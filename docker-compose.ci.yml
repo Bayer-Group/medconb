@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dev
+    ports:
+      - 5432:5432
+
+  cache:
+    image: redis:7.0.5
+    restart: always
+    ports:
+      - 6379:6379
+
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8091:8080

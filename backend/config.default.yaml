@@ -1,0 +1,33 @@
+database:
+  # type: inmemory
+  type: sqlalchemy
+  medconb:
+    url: postgresql://postgres:password@localhost/medconb
+    echo: False
+  ontologies:
+    url: postgresql://postgres:password@localhost/ontologies
+    echo: False
+cache:
+  enabled: True
+  host: localhost
+auth:
+  ad:
+    tenant: "your-tenant-id"
+    aud: "your-application-id"
+    claims:
+      - name: email
+        mapped_to: external_id
+      - name: name
+        mapped_to: name
+      - name: email
+        mapped_to: email
+  develop:
+    token: any-bearer-token
+    user_id: 00000000-0000-0000-0001-000000000001
+cors:
+  origins:
+    - "*"
+assetsDir: assets
+versionSuffix: null
+debug: False
+trace: False

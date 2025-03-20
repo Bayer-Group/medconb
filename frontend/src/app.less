@@ -1,0 +1,92 @@
+@import url('./font.less');
+
+body,
+.toastui-editor-contents {
+  margin: 0;
+  background-color: #f1f2f5;
+  font-family: 'Segoe UI';
+  // font-family: 'Helvetica Neue';
+  font-weight: 400;
+
+  font-size: 12px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
+mark {
+  background-color: #ffc53d;
+  padding: 0;
+  border-radius: 2px;
+}
+
+#block-menu-container {
+  width: 200px !important;
+  ol {
+    padding: 0 !important;
+    li {
+      button {
+        font-size: 12px !important;
+        height: 24px !important;
+        padding: 0 8px !important;
+
+        svg {
+          height: 14px;
+          width: 14px;
+        }
+      }
+    }
+  }
+}
+
+.blink {
+  animation: blinker 0.5s 5;
+}
+
+@keyframes blinker {
+  from {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    background: rgba(0, 0, 0, 0.07);
+  }
+  to {
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.ant-table-thead .ant-table-cell {
+  font-size: 10px !important;
+}
+
+/*
+.code-node{
+    color: #8C8C8C;
+}
+*/
+
+.treeview {
+    .__item{
+        color: #8C8C8C;
+    }
+    &:not(:has(.__item:hover)) .__item{
+        color: rgba(0, 0, 0, 0.88);
+    }
+    .__item:hover {
+        color: rgba(0, 0, 0, 0.88);
+    }
+
+    .__item.active {
+        color: rgba(0, 0, 0, 0.88);
+    }
+
+    //ul.active > .__item {
+    //    color: rgba(0, 0, 0, 0.88);
+    //}
+}

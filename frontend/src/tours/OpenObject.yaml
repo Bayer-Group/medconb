@@ -1,0 +1,8 @@
+name: open_objects
+steps:
+  - title: 'Open objects'
+    name: open_object
+    target: __open-tabs__
+    placement: bottom
+    description: >
+      You can open an object in edit mode, e.g. by clicking on it in the sidebar on the name. A tap opens. At first, it is a “transient” tab, and its title is written in italic; which indicates that it will close as soon as you open another object. You can pin an object by double-clicking on the tab or using the pin icon on the object page. This is especially useful when you want to add objects or compare them.

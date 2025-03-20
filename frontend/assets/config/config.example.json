@@ -1,0 +1,27 @@
+{
+  "graphql_endpoint": "https://localhost:8000/graphql/",
+  "graphql_endpoints": ["https://localhost:8000/graphql/"],
+  "dev_token": "any-bearer-token",
+  "show_version": true,
+  "msal": {
+    "auth": {
+      "clientId": "your-application-id",
+      "authority": "https://login.microsoftonline.com/your-tenant-id",
+      "redirectUri": "http://localhost:3001/"
+    },
+    "scopes": ["openid", "profile", "your-application-id/API.Access"]
+  },
+  "logStreamPrefix": "eu.qa-qa",
+  "aws": {
+    "accessKeyId": "XYZ",
+    "logGroupName": "medconb",
+    "region": "eu-central-1",
+    "secretAccessKey": "ZYX"
+  },
+  "maintenance_mode": false,
+  "glitchtipDSN": "GLITCHTIP_DSN",
+  "i18n": {
+    "companyName": "ACME",
+    "feedbackEmail": "feedback@example.com"
+  }
+}

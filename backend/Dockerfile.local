@@ -1,0 +1,15 @@
+FROM python:3.10
+
+ARG BUILD_VERSION=bar
+ENV MEDCONB_VERSION=$BUILD_VERSION
+
+WORKDIR /usr/src/app
+
+COPY requirements.txt . 
+RUN ls -lah && pip install -r requirements.txt
+
+COPY . .
+
+RUN chmod +x start_server.sh
+
+CMD [ "./start_server.sh" ]

@@ -1,0 +1,38 @@
+name: phenotype_view
+steps:
+  - title: 'Phenotype View'
+    name: intro
+    target: __object-detail__
+    placement: center
+    description: >
+      This is the "Phenotype View". Here, you can see all the details about the phenotype. Let's guide you through the page.
+
+
+      [IF tutorialState?.collection_view?.complete]Some of the elements you probably know from the collection view.[FI]
+
+      A phenotype - contrary to a collection - has two distinct descriptions: The medical and the operational description. The medical description is for the conceptual definition of the phenotype, describing the condition, outcome, criteria, etc. in a real-world medical setting. The operational description is for the detailed description of how this phenotype gets implemented for finding it in real world data. It should have to form of an algorithmic description.
+  - title: 'Phenotype Description'
+    name: desc
+    target: __phenotype-desc__
+    description: >
+      A phenotype - contrary to a collection - has a medical and an operational description.
+
+      - The medical description is for the conceptual definition of the phenotype, describing the condition, outcome, criteria, etc. in a real-world medical setting.
+
+      - The operational description is a detailed description of how this phenotype gets implemented for finding it in real-world data. It should have the form of an algorithmic description.
+
+  - title: 'Phenotype Properties'
+    name: properties
+    target: __phenotype-properties__
+    description: >
+      The properties of a phenotype serve as structured metadata, facilitating the seamless discovery and evaluation of collections.
+
+      - When you click on "Add Property," you can access a set of predefined properties.
+
+      - Certain properties are mandatory and are denoted by a small red dot. Filling in these required properties before making a collection public is essential. Additionally, you have the flexibility to include custom properties, allowing you to assign a specific name and value.
+
+  - title: 'Codelists'
+    name: content
+    target: __phenotype-content__
+    description: >
+      A Phenotype contains Codelists. They are all listed in this useful and highly customizable table. You can click on the name of the Codelist to open it.

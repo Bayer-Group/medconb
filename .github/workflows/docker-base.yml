@@ -1,0 +1,72 @@
+name: Docker Base Image
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+    paths:
+      - "backend/Dockerfile.base"
+      - "backend/environment.dev.fixed.yml"
+      - ".github/workflows/docker-base.yml"
+  schedule:
+    - cron: "5 4 * * *"
+
+jobs:
+  base_image_dev:
+    name: Base Image w/ dev dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository 🛎️
+        uses: actions/checkout@v4
+      - name: Extract requirements.txt 📦
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq -r '.dependencies[] | select(kind == "map") | .pip | join("\n") ' backend/environment.dev.fixed.yml \
+              | egrep -v '^pip($|=)' | tee backend/requirements.txt
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & push Docker image 🐳
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: ieg-dsa-medconb/backend-base
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          tags: dev
+          directory: backend/
+          dockerfile: backend/Dockerfile.base
+
+  base_image_prod:
+    name: Base Image w/o dev dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository 🛎️
+        uses: actions/checkout@v4
+      - name: Extract requirements.txt 📦
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq -r '.dependencies[] | select(kind == "map") | .pip | join("\n") ' backend/environment.prod.fixed.yml \
+              | egrep -v '^pip($|=)' | tee backend/requirements.txt
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & push Docker image 🐳
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: ieg-dsa-medconb/backend-base
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          tags: prod
+          directory: backend/
+          dockerfile: backend/Dockerfile.base

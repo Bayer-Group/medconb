@@ -1,0 +1,28 @@
+name: medconb-prod
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - ariadne
+    - authlib
+    - confuse
+    - pandas
+    - plyse==1.0.3
+    - psycopg2-binary
+    - pydantic==2.*
+    - pyparsing==2.4.0
+    - pyyaml
+    - redis
+    - requests
+    - sqlalchemy==2.*
+    - starlette
+    - starlette-context
+    - uvicorn
+
+# conda env remove -n medconb-prod
+# conda env create -n medconb-prod -f environment.prod.yml
+# conda env update -n medconb-prod -f environment.prod.yml
+# conda env export -n medconb-prod --no-builds > environment.prod.fixed.yml
+# remove `appnope` (mac only) requirement!

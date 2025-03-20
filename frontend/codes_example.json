@@ -1,0 +1,703 @@
+{
+  "id": 789,
+  "name": "ICD10",
+  "codes": [
+    {
+      "id": 4766,
+      "code": "",
+      "description": "Mental, Behavioral and Neurodevelopmental disorders (F01-F99)",
+      "children": [
+        {
+          "id": 4801,
+          "code": "F10-F19",
+          "description": "Mental and behavioral disorders due to psychoactive substance use (F10-F19)",
+          "children": [
+            {
+              "id": 4802,
+              "code": "F10",
+              "description": "Alcohol related disorders",
+              "children": [
+                {
+                  "id": 4803,
+                  "code": "F10.1",
+                  "description": "Alcohol abuse",
+                  "children": [
+                    {
+                      "id": 4815,
+                      "code": "F10.14",
+                      "description": "Alcohol abuse with alcohol-induced mood disorder",
+                      "children": []
+                    },
+                    {
+                      "id": 4816,
+                      "code": "F10.15",
+                      "description": "Alcohol abuse with alcohol-induced psychotic disorder",
+                      "children": [
+                        {
+                          "id": 4817,
+                          "code": "F10.150",
+                          "description": "Alcohol abuse with alcohol-induced psychotic disorder with delusions",
+                          "children": []
+                        },
+                        {
+                          "id": 4818,
+                          "code": "F10.151",
+                          "description": "Alcohol abuse with alcohol-induced psychotic disorder with hallucinations",
+                          "children": []
+                        },
+                        {
+                          "id": 4819,
+                          "code": "F10.159",
+                          "description": "Alcohol abuse with alcohol-induced psychotic disorder, unspecified",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "id": 4820,
+                      "code": "F10.18",
+                      "description": "Alcohol abuse with other alcohol-induced disorders",
+                      "children": [
+                        {
+                          "id": 4821,
+                          "code": "F10.180",
+                          "description": "Alcohol abuse with alcohol-induced anxiety disorder",
+                          "children": []
+                        },
+                        {
+                          "id": 4822,
+                          "code": "F10.181",
+                          "description": "Alcohol abuse with alcohol-induced sexual dysfunction",
+                          "children": []
+                        },
+                        {
+                          "id": 4823,
+                          "code": "F10.182",
+                          "description": "Alcohol abuse with alcohol-induced sleep disorder",
+                          "children": []
+                        },
+                        {
+                          "id": 4824,
+                          "code": "F10.188",
+                          "description": "Alcohol abuse with other alcohol-induced disorder",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "id": 4825,
+                      "code": "F10.19",
+                      "description": "Alcohol abuse with unspecified alcohol-induced disorder",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": 4826,
+                  "code": "F10.2",
+                  "description": "Alcohol dependence",
+                  "children": [
+                    {
+                      "id": 4838,
+                      "code": "F10.24",
+                      "description": "Alcohol dependence with alcohol-induced mood disorder",
+                      "children": []
+                    },
+                    {
+                      "id": 4839,
+                      "code": "F10.25",
+                      "description": "Alcohol dependence with alcohol-induced psychotic disorder",
+                      "children": [
+                        {
+                          "id": 4840,
+                          "code": "F10.250",
+                          "description": "Alcohol dependence with alcohol-induced psychotic disorder with delusions",
+                          "children": []
+                        },
+                        {
+                          "id": 4841,
+                          "code": "F10.251",
+                          "description": "Alcohol dependence with alcohol-induced psychotic disorder with hallucinations",
+                          "children": []
+                        },
+                        {
+                          "id": 4842,
+                          "code": "F10.259",
+                          "description": "Alcohol dependence with alcohol-induced psychotic disorder, unspecified",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "id": 4843,
+                      "code": "F10.26",
+                      "description": "Alcohol dependence with alcohol-induced persisting amnestic disorder",
+                      "children": []
+                    },
+                    {
+                      "id": 4844,
+                      "code": "F10.27",
+                      "description": "Alcohol dependence with alcohol-induced persisting dementia",
+                      "children": []
+                    },
+                    {
+                      "id": 4845,
+                      "code": "F10.28",
+                      "description": "Alcohol dependence with other alcohol-induced disorders",
+                      "children": [
+                        {
+                          "id": 4846,
+                          "code": "F10.280",
+                          "description": "Alcohol dependence with alcohol-induced anxiety disorder",
+                          "children": []
+                        },
+                        {
+                          "id": 4847,
+                          "code": "F10.281",
+                          "description": "Alcohol dependence with alcohol-induced sexual dysfunction",
+                          "children": []
+                        },
+                        {
+                          "id": 4848,
+                          "code": "F10.282",
+                          "description": "Alcohol dependence with alcohol-induced sleep disorder",
+                          "children": []
+                        },
+                        {
+                          "id": 4849,
+                          "code": "F10.288",
+                          "description": "Alcohol dependence with other alcohol-induced disorder",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "id": 4850,
+                      "code": "F10.29",
+                      "description": "Alcohol dependence with unspecified alcohol-induced disorder",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": 4851,
+                  "code": "F10.9",
+                  "description": "Alcohol use, unspecified",
+                  "children": [
+                    {
+                      "id": 4861,
+                      "code": "F10.94",
+                      "description": "Alcohol use, unspecified with alcohol-induced mood disorder",
+                      "children": []
+                    },
+                    {
+                      "id": 4862,
+                      "code": "F10.95",
+                      "description": "Alcohol use, unspecified with alcohol-induced psychotic disorder",
+                      "children": [
+                        {
+                          "id": 4863,
+                          "code": "F10.950",
+                          "description": "Alcohol use, unspecified with alcohol-induced psychotic disorder with delusions",
+                          "children": []
+                        },
+                        {
+                          "id": 4864,
+                          "code": "F10.951",
+                          "description": "Alcohol use, unspecified with alcohol-induced psychotic disorder with hallucinations",
+                          "children": []
+                        },
+                        {
+                          "id": 4865,
+                          "code": "F10.959",
+                          "description": "Alcohol use, unspecified with alcohol-induced psychotic disorder, unspecified",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "id": 4866,
+                      "code": "F10.96",
+                      "description": "Alcohol use, unspecified with alcohol-induced persisting amnestic disorder",
+                      "children": []
+                    },
+                    {
+                      "id": 4867,
+                      "code": "F10.97",
+                      "description": "Alcohol use, unspecified with alcohol-induced persisting dementia",
+                      "children": []
+                    },
+                    {
+                      "id": 4868,
+                      "code": "F10.98",
+                      "description": "Alcohol use, unspecified with other alcohol-induced disorders",
+                      "children": [
+                        {
+                          "id": 4869,
+                          "code": "F10.980",
+                          "description": "Alcohol use, unspecified with alcohol-induced anxiety disorder",
+                          "children": []
+                        },
+                        {
+                          "id": 4870,
+                          "code": "F10.981",
+                          "description": "Alcohol use, unspecified with alcohol-induced sexual dysfunction",
+                          "children": []
+                        },
+                        {
+                          "id": 4871,
+                          "code": "F10.982",
+                          "description": "Alcohol use, unspecified with alcohol-induced sleep disorder",
+                          "children": []
+                        },
+                        {
+                          "id": 4872,
+                          "code": "F10.988",
+                          "description": "Alcohol use, unspecified with other alcohol-induced disorder",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "id": 4873,
+                      "code": "F10.99",
+                      "description": "Alcohol use, unspecified with unspecified alcohol-induced disorder",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5762,
+      "code": "",
+      "description": "Diseases of the nervous system (G00-G99)",
+      "children": [
+        {
+          "id": 5891,
+          "code": "G30-G32",
+          "description": "Other degenerative diseases of the nervous system (G30-G32)",
+          "children": [
+            {
+              "id": 5897,
+              "code": "G31",
+              "description": "Other degenerative diseases of nervous system, not elsewhere classified",
+              "children": [
+                {
+                  "id": 5902,
+                  "code": "G31.2",
+                  "description": "Degeneration of nervous system due to alcohol",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 12888,
+      "code": "",
+      "description": "Diseases of the digestive system (K00-K95)",
+      "children": [
+        {
+          "id": 13674,
+          "code": "K70-K77",
+          "description": "Diseases of liver (K70-K77)",
+          "children": [
+            {
+              "id": 13732,
+              "code": "K75",
+              "description": "Other inflammatory liver diseases",
+              "children": [
+                {
+                  "id": 13738,
+                  "code": "K75.8",
+                  "description": "Other specified inflammatory liver diseases",
+                  "children": [
+                    {
+                      "id": 13739,
+                      "code": "K75.81",
+                      "description": "Nonalcoholic steatohepatitis (NASH)",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 22923,
+      "code": "",
+      "description": "Pregnancy, childbirth and the puerperium (O00-O9A)",
+      "children": [
+        {
+          "id": 23592,
+          "code": "O30-O48",
+          "description": "Maternal care related to the fetus and amniotic cavity and possible delivery problems (O30-O48)",
+          "children": [
+            {
+              "id": 23825,
+              "code": "O35",
+              "description": "Maternal care for known or suspected fetal abnormality and damage",
+              "children": [
+                {
+                  "id": 23830,
+                  "code": "O35.4",
+                  "description": "Maternal care for (suspected) damage to fetus from alcohol",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 24692,
+      "code": "",
+      "description": "Certain conditions originating in the perinatal period (P00-P96)",
+      "children": [
+        {
+          "id": 24693,
+          "code": "P00-P04",
+          "description": "Newborn affected by maternal factors and by complications of pregnancy, labor, and delivery (P00-P04)",
+          "children": [
+            {
+              "id": 24752,
+              "code": "P04",
+              "description": "Newborn affected by noxious substances transmitted via placenta or breast milk",
+              "children": [
+                {
+                  "id": 24766,
+                  "code": "P04.3",
+                  "description": "Newborn affected by maternal use of alcohol",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 25260,
+      "code": "",
+      "description": "Congenital malformations, deformations and chromosomal abnormalities (Q00-Q99)",
+      "children": [
+        {
+          "id": 26113,
+          "code": "Q80-Q89",
+          "description": "Other congenital malformations (Q80-Q89)",
+          "children": [
+            {
+              "id": 26165,
+              "code": "Q86",
+              "description": "Congenital malformation syndromes due to known exogenous causes, not elsewhere classified",
+              "children": [
+                {
+                  "id": 26166,
+                  "code": "Q86.0",
+                  "description": "Fetal alcohol syndrome (dysmorphic)",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 26281,
+      "code": "",
+      "description": "Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)",
+      "children": [
+        {
+          "id": 26836,
+          "code": "R70-R79",
+          "description": "Abnormal findings on examination of blood, without diagnosis (R70-R79)",
+          "children": [
+            {
+              "id": 26870,
+              "code": "R78",
+              "description": "Findings of drugs and other substances, not normally found in blood",
+              "children": [
+                {
+                  "id": 26871,
+                  "code": "R78.0",
+                  "description": "Finding of alcohol in blood",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 27114,
+      "code": "",
+      "description": "Injury, poisoning and certain other consequences of external causes (S00-T88)",
+      "children": [
+        {
+          "id": 38566,
+          "code": "T51-T65",
+          "description": "Toxic effects of substances chiefly nonmedicinal as to source (T51-T65)",
+          "children": [
+            {
+              "id": 38567,
+              "code": "T51",
+              "description": "Toxic effect of alcohol",
+              "children": [
+                {
+                  "id": 38592,
+                  "code": "T51.8",
+                  "description": "Toxic effect of other alcohols",
+                  "children": [
+                    {
+                      "id": 38593,
+                      "code": "T51.8X",
+                      "description": "Toxic effect of other alcohols",
+                      "children": [
+                        {
+                          "id": 38594,
+                          "code": "T51.8X1",
+                          "description": "Toxic effect of other alcohols, accidental (unintentional)",
+                          "children": []
+                        },
+                        {
+                          "id": 38595,
+                          "code": "T51.8X2",
+                          "description": "Toxic effect of other alcohols, intentional self-harm",
+                          "children": []
+                        },
+                        {
+                          "id": 38596,
+                          "code": "T51.8X3",
+                          "description": "Toxic effect of other alcohols, assault",
+                          "children": []
+                        },
+                        {
+                          "id": 38597,
+                          "code": "T51.8X4",
+                          "description": "Toxic effect of other alcohols, undetermined",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": 38598,
+                  "code": "T51.9",
+                  "description": "Toxic effect of unspecified alcohol",
+                  "children": [
+                    {
+                      "id": 38599,
+                      "code": "T51.91",
+                      "description": "Toxic effect of unspecified alcohol, accidental (unintentional)",
+                      "children": []
+                    },
+                    {
+                      "id": 38600,
+                      "code": "T51.92",
+                      "description": "Toxic effect of unspecified alcohol, intentional self-harm",
+                      "children": []
+                    },
+                    {
+                      "id": 38601,
+                      "code": "T51.93",
+                      "description": "Toxic effect of unspecified alcohol, assault",
+                      "children": []
+                    },
+                    {
+                      "id": 38602,
+                      "code": "T51.94",
+                      "description": "Toxic effect of unspecified alcohol, undetermined",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 40334,
+      "code": "",
+      "description": "External causes of morbidity (V00-Y99)",
+      "children": [
+        {
+          "id": 43375,
+          "code": "Y90-Y99",
+          "description": "Supplementary factors related to causes of morbidity classified elsewhere (Y90-Y99)",
+          "children": [
+            {
+              "id": 43376,
+              "code": "Y90",
+              "description": "Evidence of alcohol involvement determined by blood alcohol level",
+              "children": [
+                {
+                  "id": 43377,
+                  "code": "Y90.0",
+                  "description": "Blood alcohol level of less than 20 mg/100 ml",
+                  "children": []
+                },
+                {
+                  "id": 43378,
+                  "code": "Y90.1",
+                  "description": "Blood alcohol level of 20-39 mg/100 ml",
+                  "children": []
+                },
+                {
+                  "id": 43379,
+                  "code": "Y90.2",
+                  "description": "Blood alcohol level of 40-59 mg/100 ml",
+                  "children": []
+                },
+                {
+                  "id": 43380,
+                  "code": "Y90.3",
+                  "description": "Blood alcohol level of 60-79 mg/100 ml",
+                  "children": []
+                },
+                {
+                  "id": 43381,
+                  "code": "Y90.4",
+                  "description": "Blood alcohol level of 80-99 mg/100 ml",
+                  "children": []
+                },
+                {
+                  "id": 43382,
+                  "code": "Y90.5",
+                  "description": "Blood alcohol level of 100-119 mg/100 ml",
+                  "children": []
+                },
+                {
+                  "id": 43383,
+                  "code": "Y90.6",
+                  "description": "Blood alcohol level of 120-199 mg/100 ml",
+                  "children": []
+                },
+                {
+                  "id": 43384,
+                  "code": "Y90.7",
+                  "description": "Blood alcohol level of 200-239 mg/100 ml",
+                  "children": []
+                },
+                {
+                  "id": 43385,
+                  "code": "Y90.8",
+                  "description": "Blood alcohol level of 240 mg/100 ml or more",
+                  "children": []
+                },
+                {
+                  "id": 43386,
+                  "code": "Y90.9",
+                  "description": "Presence of alcohol in blood, level not specified",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43769,
+      "code": "",
+      "description": "Factors influencing health status and contact with health services (Z00-Z99)",
+      "children": [
+        {
+          "id": 43770,
+          "code": "Z00-Z13",
+          "description": "Persons encountering health services for examinations (Z00-Z13)",
+          "children": [
+            {
+              "id": 43824,
+              "code": "Z02",
+              "description": "Encounter for administrative examination",
+              "children": [
+                {
+                  "id": 43835,
+                  "code": "Z02.8",
+                  "description": "Encounter for other administrative examinations",
+                  "children": [
+                    {
+                      "id": 43838,
+                      "code": "Z02.83",
+                      "description": "Encounter for blood-alcohol and blood-drug test",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 44702,
+          "code": "Z69-Z76",
+          "description": "Persons encountering health services in other circumstances (Z69-Z76)",
+          "children": [
+            {
+              "id": 44724,
+              "code": "Z71",
+              "description": "Persons encountering health services for other counseling and medical advice, not elsewhere classified",
+              "children": [
+                {
+                  "id": 44729,
+                  "code": "Z71.4",
+                  "description": "Alcohol abuse counseling and surveillance",
+                  "children": [
+                    {
+                      "id": 44730,
+                      "code": "Z71.41",
+                      "description": "Alcohol abuse counseling and surveillance of alcoholic",
+                      "children": []
+                    },
+                    {
+                      "id": 44731,
+                      "code": "Z71.42",
+                      "description": "Counseling for family member of alcoholic",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 44809,
+          "code": "Z77-Z99",
+          "description": "Persons with potential health hazards related to family and personal history and certain conditions influencing health status (Z77-Z99)",
+          "children": [
+            {
+              "id": 44886,
+              "code": "Z81",
+              "description": "Family history of mental and behavioral disorders",
+              "children": [
+                {
+                  "id": 44888,
+                  "code": "Z81.1",
+                  "description": "Family history of alcohol abuse and dependence",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
