@@ -1,0 +1,23 @@
+[tool.ariadne-codegen]
+schema_path = "schema.graphql"
+queries_path = "schema.graphql"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["medconb"]
+
+[tool.pylama]
+# linters = mccabe,pycodestyle,pydocstyle,pyflakes,radon
+linters = "mccabe,pycodestyle,pyflakes,radon"
+# ignore = ""
+
+[tool.pylama.linter.pycodestyle]
+# as black uses
+max_line_length = 88
+ignore = "E203,W503,E704,E701"
+
+[[tool.pylama.files]]
+# imported but unused
+path = "*/__init__.py"
+ignore = "W0611"

@@ -1,0 +1,33 @@
+name: welcome
+steps:
+  - title: 'Welcome to the Medical Concept Builder!'
+    name: welcome
+    description: >
+      Welcome to the Medical Concept Builder, your go-to tool for creating, finding and organizing medical concepts. This onboarding tutorial will guide you through the platform's key features, ensuring you make the most out of its capabilities.
+  - title: 'The sidebar'
+    name: sidebar
+    target: __sidebar__
+    placement: right
+    description: >
+      In the sidebar you can find private and shared collections, phenotypes and codelists.
+  - title: 'What are Phenotypes'
+    name: phenotypes
+    target: __private-phenotype-collection__
+    placement: right
+    description: >
+      Phenotypes function as real-world data (RWD) counterparts to patient characteristics and medical concepts found in studies. Serving as a structured representation, phenotypes offer operational and contextual meta-information.
+
+
+      A Phenotype can be something simple as “Diabetes”, used as inclusion criteria for a cohort, defined as the occurrence of diabetes codes within 365 days before index date and validated on Optum EHR data. Or something complex as “High CHADSVASC Score”, defined as a score above a certain value with a complete description of how the score is calculated on the data.
+  - title: 'What are Codelists'
+    name: codelists
+    target: __private-codelist-collection__
+    placement: right
+    description: >
+      Codelists are building blocks for Phenotypes. They are lists of codes from ontologies for diagnoses, procedures, medications, etc. Complex Phenotypes may reference multiple codelists in their definition (e.g. diagnoses codes for diabetes (codelist “Diabetes”) but no insulin injections (codelist “Insulin injections”)).
+  - title: 'What are Collections'
+    name: collections
+    target: __private-phenotype-collection__
+    placement: right
+    description: >
+      Within the Medical Concept Builder, there are two distinct types of collections: phenotype collections and codelist collections. These collections serve to contextualize the use case, offering a structured way to organize and group several phenotypes or codelists.

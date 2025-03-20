@@ -1,0 +1,42 @@
+name: Docker Build & Deploy
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - "release/**"
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    outputs:
+      do_push: ${{ steps.do_push.outputs.DO_PUSH == '1' }}
+    steps:
+      - name: Decide if push is enabled
+        id: do_push
+        if: |
+          github.event_name == 'push'
+          && (
+            contains(fromJson('["main", "develop"]'), github.ref_name)
+            || startsWith(github.ref_name, 'release/')
+            || startsWith(github.ref_name, 'feature/')
+            || startsWith(github.ref_name, 'bugfix/')
+            || github.ref_type == 'tag'
+          )
+        run: echo "DO_PUSH=1" >> $GITHUB_OUTPUT
+
+  frontend-ci:
+    uses: ./.github/workflows/frontend-ci.yml
+    needs: checks
+    secrets: inherit
+    with:
+      do_push: ${{ fromJSON(needs.checks.outputs.do_push) }}
+
+  backend-ci:
+    uses: ./.github/workflows/backend-ci.yml
+    needs: checks
+    secrets: inherit
+    with:
+      do_push: ${{ fromJSON(needs.checks.outputs.do_push) }}

@@ -1,0 +1,32 @@
+name: medconb
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - ariadne
+    - authlib
+    - confuse
+    - pandas
+    - psycopg2-binary
+    - pydantic
+    - pyyaml
+    - sqlalchemy
+    - starlette
+    - uvicorn
+  # # dev dependencies:
+  # - black
+  # - pylama
+  # - mccabe
+  # - pycodestyle
+  # - pyflakes
+  # - radon
+  # - ipython
+  # - vulture
+
+# conda env remove -n medconb
+# conda env create -n medconb -f environment.yml
+# conda env update -n medconb -f environment.dev.yml
+# conda env export -n medconb --no-builds > environment.dev.fixed.yml
+# remove `appnope` (mac only) requirement!

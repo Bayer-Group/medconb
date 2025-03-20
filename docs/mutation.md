@@ -1,0 +1,3 @@
+# Mutation
+
+::: medconb.graphql.mutation

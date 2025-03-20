@@ -1,0 +1,170 @@
+name: Backend CI
+
+on:
+  workflow_call:
+    inputs:
+      do_push:
+        required: true
+        type: boolean
+    secrets:
+      ARTIFACTORY_USER:
+        required: true
+      ARTIFACTORY_PASSWORD:
+        required: true
+    outputs:
+      success:
+        description: "If all tests were successful"
+        value: |
+          ${{
+            jobs.linting.result == 'success'
+            && jobs.typecheck.result == 'success'
+            && jobs.pytest.result == 'success' 
+          }}
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository 🛎️
+        uses: actions/checkout@v4
+      - name: Install Python 3.10 🐍
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Set up runner 📦
+        run: pip3 install black pylama[toml] pycodestyle mccabe pyflakes radon vulture
+      - name: "Black: Code Formatting 👮🏽‍♀️"
+        run: black --check ./backend
+      - name: "Pylama: Linting 🧹"
+        run: pylama ./backend
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository 🛎️
+        uses: actions/checkout@v4
+      - name: Install Python 3.10 🐍
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Extract requirements.txt 📦
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq -r '.dependencies[] | select(kind == "map") | .pip | join("\n") ' backend/environment.dev.fixed.yml \
+              | egrep -v '^pip($|=)' | tee backend/requirements.txt
+      - name: Set up runner 📦
+        run: pip3 install -r backend/requirements.txt
+      - name: Run mypy 👮🏽‍♀️
+        run: mypy backend/medconb
+
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install packages on runner 📦
+        run: |
+          sudo apt update
+          sudo apt install git-lfs
+      - name: Checkout Repository 🛎️
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: 🐳 Pull images
+        run: |
+          docker pull postgres:14
+          docker pull redis:7.0.5
+          docker pull migrate/migrate:4
+      - name: Spin up database 💾
+        run: |
+          mkdir -p $HOME/.docker/cli-plugins
+          curl -s https://api.github.com/repos/docker/compose/releases/latest > latest.json
+          FILENAME=$(jq -r '.assets[].browser_download_url | select(. | endswith("docker-compose-linux-x86_64"))' latest.json)
+          echo "$FILENAME"
+          wget -q "$FILENAME" -O $HOME/.docker/cli-plugins/docker-compose
+          chmod +x $HOME/.docker/cli-plugins/docker-compose
+          docker compose -f docker-compose.ci.yml up -d
+      - name: Install Python 3.10 🐍
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Extract requirements.txt 📦
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq -r '.dependencies[] | select(kind == "map") | .pip | join("\n") ' backend/environment.dev.fixed.yml \
+              | egrep -v '^pip($|=)' | tee backend/requirements.txt
+      - name: Set up environment 📦
+        run: pip3 install -r backend/requirements.txt
+      - name: Initialize database 💾
+        run: |
+          CONTAINER_ID=$(docker compose -f docker-compose.ci.yml ps -q db)
+          docker cp backend/fixtures/ $CONTAINER_ID:/tmp/data/
+          docker exec -i $CONTAINER_ID ls -lah /tmp/data
+          docker exec -i -u postgres $CONTAINER_ID psql -c "DROP DATABASE IF EXISTS test_template"
+          docker exec -i -u postgres $CONTAINER_ID psql -c "CREATE DATABASE test_template"
+          docker ps -a
+          docker run -v "$(pwd)/backend/migrate:/migrations" --network host migrate/migrate:4 \
+            -database "postgres://postgres:password@localhost/test_template?sslmode=disable" \
+            -path=/migrations/ up
+          docker run -v "$(pwd)/backend/migrate:/migrations" --network host migrate/migrate:4 \
+            -database 'postgres://postgres:password@localhost/test_template?sslmode=disable' \
+            -path=/migrations/ version 2> /tmp/medconb_db_version
+          DB_VERSION=$(cat /tmp/medconb_db_version)
+          docker exec -i -u postgres $CONTAINER_ID psql -d test_template -f /tmp/data/${DB_VERSION}_fixtures.sql
+          docker exec -i -u postgres $CONTAINER_ID psql -c "DROP DATABASE IF EXISTS ontologies"
+          docker exec -i -u postgres $CONTAINER_ID psql -c "CREATE DATABASE ontologies"
+          docker exec -i -u postgres $CONTAINER_ID /bin/bash -c 'gunzip -c /tmp/data/ontologies.sql.gz | psql -d ontologies'
+      - name: Run pytest 👮🏽‍♀️
+        run: make test
+
+  build-push:
+    runs-on: ubuntu-latest
+    needs: [linting, typecheck, pytest]
+    if: |
+      needs.linting.result == 'success'
+      && needs.typecheck.result == 'success'
+      && needs.pytest.result == 'success'
+    steps:
+      - name: Checkout Repository 🛎️
+        uses: actions/checkout@v4
+      - name: Extract requirements.txt 📦
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq -r '.dependencies[] | select(kind == "map") | .pip | join("\n") ' backend/environment.prod.fixed.yml \
+              | egrep -v '^pip($|=)' | tee backend/requirements.txt
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/Bayer-Group/medconb/backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+      - name: Docker more meta 📦
+        id: meta2
+        run: |
+          echo "sha1=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build & push Docker image 🐳
+        uses: docker/build-push-action@v6
+        with:
+          context: backend/
+          push: ${{ inputs.do_push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            IMAGE_TAG=prod
+            BUILD_VERSION=${{ steps.meta2.outputs.sha1 }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

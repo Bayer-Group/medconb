@@ -1,0 +1,344 @@
+scalar Datetime
+
+type Query {
+  self: Me!
+  users(ids: [ID!]): [User!]!
+  ontologies: [Ontology!]!
+  ontology(name: String!): Ontology
+  code(id: ID!): Code
+  codes(ids: [ID!]!): [Code!]!
+  collection(id: ID!, itemType: ItemType): Collection!
+  phenotype(phenotypeID: ID!): Phenotype!
+  codelist(codelistID: ID!): Codelist!
+
+  searchCodes(ontologyID: ID!, query: QueryData): [Code!]!
+  searchEntities(
+    entityType: SearchableEntity!
+    query: String!
+    pageSize: Int
+    startCursor: ID
+  ): SearchResults!
+
+  properties(clazz: PropertyClass): [Property!]!
+}
+
+type Mutation {
+  createCollection(
+    name: String!
+    itemType: ItemType!
+    description: String
+    properties: [PropertyValueInput!]
+    referenceID: ID
+  ): Collection
+  updateCollection(
+    collectionID: ID!
+    name: String
+    description: String
+    properties: [PropertyValueInput!]
+    referenceID: ID
+    ownerID: ID
+    locked: Boolean
+  ): Collection
+  deleteCollection(collectionID: ID!): Boolean
+  moveCollection(collectionID: ID!, refCollectionID: ID): Boolean
+  setCollectionPermissions(collectionID: ID!, readerIds: [ID!]!): Boolean
+
+  createPhenotype(
+    position: ReferencePosition!
+    name: String!
+    medicalDescription: String
+    operationalDescription: String
+    properties: [PropertyValueInput!]
+    referenceID: ID
+  ): Phenotype
+  updatePhenotype(
+    phenotypeID: ID!
+    position: ReferencePosition
+    name: String
+    medicalDescription: String
+    operationalDescription: String
+    properties: [PropertyValueInput!]
+    referenceID: ID
+  ): Phenotype
+  deletePhenotype(phenotypeID: ID!): Boolean
+  clonePhenotype(phenotypeID: ID!, position: ReferencePosition): Phenotype!
+
+  createCodelist(
+    position: ReferencePosition!
+    name: String!
+    description: String
+    referenceID: ID
+  ): Codelist
+  updateCodelist(
+    codelistID: ID!
+    name: String
+    description: String
+    referenceID: ID
+  ): Codelist
+  deleteCodelist(codelistID: ID!): Boolean
+  cloneCodelist(codelistID: ID!, position: ReferencePosition): Codelist!
+  moveCodelist(codelistID: ID!, position: ReferencePosition!): Boolean
+
+  importCodelists(
+    containerID: ID!
+    codelists: [CodelistInput!]!
+    filename: String!
+  ): ImportCodelistsResponse
+
+  commitChanges(codelistID: ID!, commit: CommitInput!): Codelist!
+  storeTransientChanges(codelistID: ID!, changes: [ChangesetInput!]!): Codelist!
+  discardTransientChanges(codelistID: ID!): Codelist!
+
+  updateMe(tutorialState: String): Me!
+}
+
+input ReferencePosition {
+  containerID: ID
+  itemID: ID
+}
+
+input CommitInput {
+  message: String!
+  changes: [ChangesetInput!]!
+}
+
+input ChangesetInput {
+  ontologyID: ID!
+  added: [ID!]
+  removed: [ID!]
+}
+
+input CodelistInput {
+  name: String!
+  codesets: [CodesetInput!]!
+}
+
+input CodesetInput {
+  ontologyID: ID!
+  codes: [String!]
+}
+
+type Me {
+  id: ID!
+  externalId: String!
+  name: String!
+  tutorialState: String!
+  workspace: Workspace!
+}
+
+type User {
+  id: ID!
+  externalId: String!
+  name: String!
+}
+
+type Workspace {
+  collections(itemType: ItemType): [Collection!]!
+  shared(itemType: ItemType): [Collection!]!
+  libraries: [Collection!]!
+}
+
+enum SearchableEntity {
+  PhenotypeCollection
+  CodelistCollection
+  Phenotype
+  Codelist
+}
+
+type SearchResults {
+  items: [SearchResultItem!]!
+  total: Int!
+}
+
+union SearchResultItem = Collection | Phenotype | Codelist
+
+enum PropertyClass {
+  Collection
+  Phenotype
+}
+
+enum PropertyDType {
+  Text
+  Number
+  Enum
+  Time
+  User
+}
+
+type Property {
+  id: Int!
+  name: String!
+  class: PropertyClass!
+  dtype: PropertyDType!
+  required: Boolean!
+  readOnly: Boolean!
+
+  "If dtype is Enum this lists all valid options."
+  options: [String!]
+}
+
+type PropertyValue {
+  propertyID: Int
+  name: String!
+  value: String!
+}
+
+"""
+Input for creating or updating a property value.
+If propertyID is not provided, a custom property is created.
+A value of null deletes the property.
+"""
+input PropertyValueInput {
+  propertyID: Int
+  name: String!
+  value: String
+}
+
+type ContainerSpec {
+  type: ContainerType!
+  id: ID!
+  name: String!
+  locked: Boolean!
+
+  """
+  visibility is calculated for the current user and not an
+  inherent property of ContainerSpec.
+  """
+  visibility: ContainerVisibility!
+}
+
+enum ContainerVisibility {
+  Private
+  Shared
+  Public
+}
+
+enum ItemType {
+  Phenotype
+  Codelist
+}
+
+enum ContainerType {
+  Collection
+  Phenotype
+}
+
+union ContainerItem = Codelist | Phenotype
+
+type Collection {
+  id: ID!
+  name: String!
+  description: String
+  referenceID: ID
+  itemType: ItemType!
+  items: [ContainerItem!]!
+  properties: [PropertyValue!]!
+  sharedWith: [ID!]!
+  ownerID: ID!
+  locked: Boolean!
+
+  """
+  visibility is calculated for the current user and not an
+  inherent property of ContainerSpec.
+  """
+  visibility: ContainerVisibility!
+}
+
+type Phenotype {
+  id: ID!
+  name: String!
+  medicalDescription: String
+  operationalDescription: String
+  referenceID: ID
+  codelists: [Codelist!]!
+  properties: [PropertyValue!]!
+  containerHierarchy: [ContainerSpec!]!
+  ownerID: ID!
+}
+
+type Codelist {
+  id: ID!
+  name: String!
+  description: String
+  referenceID: ID
+  codesets: [Codeset!]!
+  commits: [Commit!]!
+  transientCommit: Commit
+  transientCodesets: [Codeset!]
+  containerHierarchy: [ContainerSpec!]!
+  ownerID: ID!
+}
+
+type Commit {
+  author: User!
+  createdAt: Datetime!
+  message: String!
+  changesets: [Changeset!]!
+}
+
+type Changeset {
+  ontology: Ontology!
+  added: [Code!]
+  removed: [Code!]
+}
+
+type Ontology {
+  name: String!
+
+  # If you only request the rootCode ids, you can set the
+  # page_size to -1 in order to get all ids without pagination.
+  rootCodes(pageSize: Int, startCursor: ID): [Code!]!
+}
+
+type Codeset {
+  ontology: Ontology!
+  codes: [Code!]!
+}
+
+type Code {
+  id: ID!
+  code: String!
+  description: String!
+  parent: Code
+  path: [Code!]!
+
+  # If you only request the children ids, you can set the
+  # page_size to -1 in order to get all ids without pagination.
+  children(pageSize: Int, startCursor: ID): [Code!]
+  numberOfChildren: Int!
+  lastDescendantId: Int!
+}
+
+type ImportCodelistsResponse {
+  stats: ImportStats!
+  reports: [ImportReport!]
+}
+
+type ImportStats {
+  fully: Int!
+  partially: Int!
+  skipped: Int!
+}
+
+type ImportReport {
+  codelistID: ID
+  codelistName: String!
+  skipped: Boolean!
+  partial: Boolean
+  report: String
+}
+
+input QueryData {
+  code: QueryDataCode
+  description: String
+}
+
+input QueryDataCode {
+  value: String!
+  type: QueryDataCodeType
+}
+
+enum QueryDataCodeType {
+  ILIKE
+  POSIX
+}

@@ -1,0 +1,81 @@
+{
+  "cSpell.words": [
+    "asgi",
+    "associationproxy",
+    "autouse",
+    "backref",
+    "changesets",
+    "clazz",
+    "Codelist",
+    "Codelistish",
+    "Codelists",
+    "codeset",
+    "codesets",
+    "Datetime",
+    "dockerconfigjson",
+    "dtos",
+    "excinfo",
+    "freetext",
+    "getpid",
+    "getset",
+    "ilike",
+    "IMAGEID",
+    "interactor",
+    "interactors",
+    "isouter",
+    "kubectl",
+    "kubernetes",
+    "lrange",
+    "medconb",
+    "nopep",
+    "onclause",
+    "orderinglist",
+    "outerjoin",
+    "Phenotypish",
+    "plyse",
+    "primaryjoin",
+    "psycopg",
+    "pullable",
+    "pydantic",
+    "rpush",
+    "selectin",
+    "serde",
+    "sessionmaker",
+    "Starlette",
+    "tolerations",
+    "typecheck",
+    "unnest",
+    "urandom",
+    "uselist",
+    "uvicorn"
+  ],
+  "editor.rulers": [72, 88, 119],
+  "editor.formatOnSave": true,
+  "python.testing.pytestArgs": [
+    "--cov-report",
+    "xml:cov.xml",
+    "--cov",
+    "backend/medconb",
+    "backend/test/domain",
+    "backend/test/graphql",
+    "backend/test/interactors",
+    "backend/test/persistence",
+    "backend/test/middleware",
+    "backend/test/api"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "sops.defaults.awsProfile": "ieg",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[yaml]": {
+    "editor.formatOnSave": false
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "vscode.markdown-language-features"
+  }
+}

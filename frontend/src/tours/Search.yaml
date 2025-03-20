@@ -1,0 +1,24 @@
+name: search
+steps:
+  - title: 'Search'
+    name: intro
+    target: __ontology-search__
+    description: >
+      This is the global search. Here, you can find everything on this platform you are looking for.
+
+      Let's guide you through this feature.
+  - title: 'Freetext Search'
+    name: freetext-search
+    target: __freetext-search__
+    description: >
+      Here you can search within name and description of all objects (Collections, Phenotypes, Codelists).
+      You can use advanced search operators like AND, OR, NOT, "exact phrase", (brackets) and * (wildcard).
+
+      To search, type something in the search box and click on the search button or press enter.
+  - title: 'Primary Filters'
+    name: primary-filters
+    target: __primary-filters__
+    description: >
+      With these primary filters you can select which object types you want to search
+      for (Collections of Phenotypes/Codelists, Phenotypes or Codelists).  
+      Also you can filter the results by their visibility (owned, shared with me, public).

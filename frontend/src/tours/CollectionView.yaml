@@ -1,0 +1,33 @@
+name: collection_view
+steps:
+  - title: 'Collection View'
+    name: intro
+    target: __object-detail__
+    placement: center
+    description: >
+      This is the "Collection View". Here you can see all the details about the collection. Let's guide you through the page.
+  - title: 'Collection Name'
+    name: name
+    target: __collection-name__
+    description: >
+      This is the name of the collection. You can edit it inline by clicking the text and start typing. You can also change the title when you double-click on its name in the sidebar.
+  - title: 'Collection Description'
+    name: description
+    target: __collection-desc__
+    description: >
+      This is the description of the collection. Please help others by adding a description with some useful information. The description supports rich text, meaning you can use bold, italic, header, and other formatting options. Select some text and use the formatting toolbox or simply type “/” in an empty line to open the menu.
+  - title: 'Collection Properties'
+    name: properties
+    target: __collection-properties__
+    description: >
+      The properties of a collection serve as structured metadata, facilitating the seamless discovery and evaluation of collections. When you click the "Add Property" button, you can access a set of predefined properties.
+
+
+      - Certain properties are mandatory and are denoted by a small red dot; only if all mandatory information is added can you make your collection public.
+
+      - Additionally, you have the flexibility to include custom properties, allowing you to assign a specific name and value.
+  - title: 'Collection Content'
+    name: content
+    target: __collection-content__
+    description: >
+      This is a [IF collectionType=='Phenotype']Phenotype[ELSE]Codelist[FI] Collection. It contains [IF collectionType=='Phenotype']Phenotypes[ELSE]Codelists[FI]. They are all listed in this useful and highly customizable table. It can list all the properties; You can configure the view via the cog menu. You can click on the name of the [IF collectionType=='Phenotype']Phenotype[ELSE]Codelist[FI] to open it.

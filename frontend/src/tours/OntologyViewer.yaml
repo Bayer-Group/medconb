@@ -1,0 +1,51 @@
+name: ontology_viewer
+steps:
+  - title: 'Ontology Viewer'
+    name: intro
+    target: __ontology-viewer__
+    description: >
+      This is the "Ontology Viewer" - a core component of the Medical Concept Builder.  
+      It allows you to browse all the medical ontologies we offer, view codelists in the context of the ontology trees
+      and compare multiple codelists.
+
+      Let's guide you through this feature.
+  - title: 'Code View'
+    name: code-view
+    target: __ontology-main__
+    description: >
+      In this section, the codes of the selected ontology are displayed. By default this is a hierarchical view.
+      Click on the carets (triangles) or simply the code description to view lower level codes.
+  - title: 'Search'
+    name: search
+    target: __ontology-search__
+    description: >
+      The search can be performed on the code description or the code itself. To search, type something in the search
+      box and click on the search button or press enter.
+      For searching on the code itself, you can choose between two different formats. By default you are using the
+      simple mode. You always have to search for the complete code. As placeholder you can use "%" for any amount
+      of characters and "_" for a single character. For example, if you want to search for all codes starting with "A",
+      you can search for "A%". If you want to search for all three character codes starting with "A", you can search
+      for "A__".  
+      To switch to regex mode, click the _.*_ icon. In this mode you can use
+      [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) to search for codes.
+
+      The code view will be filtered according to the search results.
+  - title: 'Ontology Selection'
+    name: ontology-selector
+    target: __ontology-selector__
+    description: >
+      This is the Ontology Selector. Click on this dropdown and select the Ontology you wish to view.
+      The codes of that Ontology will be displayed below.
+  - title: 'Ontology Menu'
+    name: ontology-menu
+    target: __ontology-menu__
+    description: >
+      When you click these three dots, the Ontology Viewer Menu will open. Here you can configure the Ontology Viewer.
+      You can change the view to a flat view, which will display all codes in a flat list. You can apply some quick
+      filters to the code view. Or you can execute soe quick actions like "Collapse all tiers".
+  - title: 'Active Codelists'
+    name: active-codelists
+    target: __ontology-active-codelists__
+    description: >
+      This is the Active Codelists section. Here you can see all the codelists that are currently active and displayed
+      in the Ontology Viewer.

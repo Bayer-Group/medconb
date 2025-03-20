@@ -1,0 +1,52 @@
+name: medconb
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - ariadne
+    - authlib
+    - confuse
+    - pandas
+    - plyse==1.0.3
+    - psycopg2-binary
+    - pydantic==2.*
+    - pyparsing==2.4.0
+    - pyyaml
+    - redis
+    - sqlalchemy==2.*
+    - starlette
+    - starlette-context
+    - uvicorn
+  # dev dependencies:
+    - black
+    - devtools
+    - httpx
+    - ipython
+    - isort==5.*
+    - mccabe
+    - mypy
+    - pycodestyle
+    - pyflakes
+    - pytest
+    - pytest-asyncio
+    - pytest-cov
+    - pylama
+    - radon
+    - requests  # integration tests with starlette TestClient
+    - sqlalchemy[mypy]
+    - types-PyYAML
+    - types-redis
+    - types-requests
+    # doc dependencies:
+    - mkdocstrings
+    - mkdocstrings[python]
+    - mkdocs-glightbox
+    - mkdocs-literate-nav
+    - mkdocs-material
+# conda env remove -n medconb
+# conda env create -n medconb -f environment.dev.yml
+# conda env update -n medconb -f environment.dev.yml
+# conda env export -n medconb --no-builds > environment.dev.fixed.yml
+# remove `appnope` (mac only) requirement!

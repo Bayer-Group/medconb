@@ -1,0 +1,39 @@
+services:
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3001:3001
+
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile.local
+    volumes:
+      - ./backend/config.yaml:/root/.config/MedConB/config.yaml
+    environment:
+      - UVICORN_HOST=0.0.0.0
+    ports:
+      - 8000:8000
+
+  db:
+    image: postgres:14
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dev
+    ports:
+      - 5432:5432
+
+  cache:
+    image: redis:7.0.5
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 8091:8080

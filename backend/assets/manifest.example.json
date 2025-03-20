@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "name": "codes_ICD-10-CM.example.csv.gz",
+      "num_codes": 95846
+    },
+    {
+      "name": "codes_ICD-9-CM.example.csv.gz",
+      "num_codes": 22406
+    }
+  ]
+}
