@@ -152,8 +152,10 @@ class Commit:
 @dataclass
 class Codeset:
     """
-    A Codeset represents a set of codes from one medical coding system (ontology) that are part of a specific codelist version.
-    Each codelist can contain multiple codesets, one for each ontology it references.
+    A Codeset represents a set of codes from one medical coding system
+    (ontology) that are part of a specific codelist version.
+    Each codelist can contain multiple codesets, one for each ontology
+    it references.
     """
 
     ontology_id: str
