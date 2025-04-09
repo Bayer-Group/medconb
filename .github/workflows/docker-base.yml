@@ -9,6 +9,7 @@ on:
       - ".github/workflows/docker-base.yml"
   schedule:
     - cron: "5 4 * * *"
+  workflow_dispatch: {}
 
 jobs:
   base_image_dev:

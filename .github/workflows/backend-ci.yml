@@ -138,7 +138,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/Bayer-Group/medconb/backend
+          images: ghcr.io/bayer-group/medconb/backend
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
