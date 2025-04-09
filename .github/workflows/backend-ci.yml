@@ -6,11 +6,6 @@ on:
       do_push:
         required: true
         type: boolean
-    secrets:
-      ARTIFACTORY_USER:
-        required: true
-      ARTIFACTORY_PASSWORD:
-        required: true
     outputs:
       success:
         description: "If all tests were successful"
