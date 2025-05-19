@@ -5,7 +5,7 @@ import Icon, {
   MinusCircleFilled,
   PlusCircleFilled,
 } from '@ant-design/icons'
-import {useMutation} from '@apollo/client'
+import {ApolloError, useMutation} from '@apollo/client'
 import {styled} from '@linaria/react'
 import {Button, Flex, Input, Modal, Space, Spin, Typography} from 'antd'
 import {keys, xor} from 'lodash'
@@ -24,6 +24,7 @@ import {clearChangeSet} from './store/changes'
 import {endSave, startSave} from './store/ui'
 import {ChangeSet} from './store/workspace'
 import useChangeSet from './useChangeSet'
+import {GraphQLError} from 'graphql'
 
 type SaveCodelistProps = {
   codelist: Codelist
@@ -94,6 +95,9 @@ const SaveCodelist: React.FC<SaveCodelistProps> = ({codelist, onClose, collectio
       })
     }
     try {
+      throw new ApolloError({
+        graphQLErrors: [new GraphQLError('test')],
+      })
       await commitChanges({
         variables: {
           codelistID: codelist.id,
