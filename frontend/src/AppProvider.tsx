@@ -119,7 +119,7 @@ export const AppProvider: React.FC<{sessionId: string}> = ({sessionId}) => {
         <AppContext.Provider value={{apolloCachePersistor: apolloCachePersistor, reduxPersistor}}>
           <Provider store={store}>
             <PersistGate loading={null} persistor={reduxPersistor}>
-              <App showVersion={config.show_version || false} />
+              <App showVersion={config.show_version} />
             </PersistGate>
           </Provider>
         </AppContext.Provider>
