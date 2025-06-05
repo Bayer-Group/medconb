@@ -90,6 +90,9 @@ type Mutation {
   discardTransientChanges(codelistID: ID!): Codelist!
 
   updateMe(tutorialState: String): Me!
+
+  registerUser(email: String!, password: String!, name: String!): Boolean!
+  login(email: String!, password: String!): TokenPayload!
 }
 
 input ReferencePosition {
@@ -341,4 +344,8 @@ input QueryDataCode {
 enum QueryDataCodeType {
   ILIKE
   POSIX
+}
+
+type TokenPayload {
+  token: String!
 }

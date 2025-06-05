@@ -1,3 +1,4 @@
+import os
 import uuid
 from unittest import TestCase
 
@@ -133,7 +134,7 @@ class MockSession:
     # implement the required properties and methods of the Session protocol
     @property
     def user_repository(self):
-        return NotImplemented
+        return self.UserRepository(self, d.User)
 
     @property
     def collection_repository(self):
@@ -201,3 +202,13 @@ class MockSession:
                 if code.code in codes:
                     res[code.code] = code.id
             return res
+
+    class UserRepository(Repository):
+        def get_by_email(self, email):
+            return next(iter(self.get_by("email", email)), None)
+
+        def new_id(self) -> d.UserID:
+            return d.UserID(bytes=os.urandom(16), version=4)
+
+        def new_workspace_id(self) -> d.WorkspaceID:
+            return d.WorkspaceID(bytes=os.urandom(16), version=4)

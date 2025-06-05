@@ -21,6 +21,8 @@ auth:
         mapped_to: name
       - name: email
         mapped_to: email
+  password:
+    secret: supersecret
   develop:
     token: any-bearer-token
     user_id: 00000000-0000-0000-0001-000000000001

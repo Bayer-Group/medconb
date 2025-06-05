@@ -1,10 +1,12 @@
 import os
-from typing import Callable, Sequence
+from typing import Any, Callable, Optional, Sequence
 
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLHTTPHandler, GraphQLWSHandler
+from graphql import DocumentNode, FieldNode, OperationDefinitionNode, OperationType
+from graphql.validation import ValidationRule
 from starlette.applications import Starlette
-from starlette.authentication import requires
+from starlette.authentication import has_required_scope
 from starlette.exceptions import HTTPException
 from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
@@ -52,28 +54,59 @@ def status(version_suffix: str | None) -> Callable:
     return status_
 
 
-class SecureGraphQLHTTPHandler(GraphQLHTTPHandler):
-    """
-    GQLHTTPHandler changes the ariadne GraphQLHTTPHandler class such
-    that requests are wrapped by the auth middleware, except the graphql
-    playground.
-    """
-
+class TimedGraphQLHTTPHandler(GraphQLHTTPHandler):
     @time_me(__name__)
-    @requires("authenticated")
     async def graphql_http_server(self, request: Request) -> Response:
         return await super().graphql_http_server(request)
 
 
-class SecureGraphQLWSHandler(GraphQLWSHandler):
-    """
-    GQLWSHandler changes the ariadne GraphQLWSHandler class such
-    that requests are wrapped by the auth middleware.
-    """
-
-    @requires("authenticated")
+class TimedGraphQLWSHandler(GraphQLWSHandler):
+    @time_me(__name__)
     async def handle_websocket_message(self, websocket, message, operations):
         return await super().handle_websocket_message(websocket, message, operations)
+
+
+def validation_rules(context_value: Optional[Any], document: DocumentNode, data: dict):
+    assert isinstance(
+        context_value, dict
+    ), "Can not instantiate validation rules: context_value needs to be a dictionary"
+
+    request = context_value["request"]
+    assert isinstance(request, Request)
+
+    if has_required_scope(request, ["authenticated"]):
+        return None
+
+    return [OnlyPublicValidationRule]
+
+
+class OnlyPublicValidationRule(ValidationRule):
+    PUBLIC_OPERATIONS = ["registerUser", "login"]
+
+    def enter_document(self, node: DocumentNode, key, parent, path, ancestors):
+        for definition in node.definitions:
+            if not isinstance(definition, OperationDefinitionNode):
+                raise HTTPException(status_code=403)
+
+            if definition.operation != OperationType.MUTATION:
+                raise HTTPException(status_code=403)
+
+            if definition.directives:
+                print(
+                    "Directives found in mutation definition, not allowed for public."
+                )
+                raise HTTPException(status_code=403)
+
+            for selection in definition.selection_set.selections:
+                if not isinstance(selection, FieldNode):
+                    print("Non-FieldNode not allowed for public.")
+                    raise HTTPException(status_code=403)
+
+                if selection.name.value not in self.PUBLIC_OPERATIONS:
+                    print(f"Operation '{selection.name.value}' not allowed for public.")
+                    raise HTTPException(status_code=403)
+
+        return
 
 
 class SecureStaticFiles(StaticFiles):
@@ -147,8 +180,9 @@ def create_app(
                 "/graphql",
                 GraphQL(
                     graphql.schema,
-                    http_handler=SecureGraphQLHTTPHandler(),
-                    websocket_handler=SecureGraphQLWSHandler(),
+                    http_handler=TimedGraphQLHTTPHandler(),
+                    websocket_handler=TimedGraphQLWSHandler(),
+                    validation_rules=validation_rules,
                     debug=debug_,
                 ),
             ),

@@ -11,15 +11,36 @@ from .helper import MockSession, create_Codelist, create_Collection, create_Phen
 @pytest.fixture
 def user():
     workspace = d.Workspace(id="workspace_id", collection_ids=[])
-    return d.User(id=_u_id(1), external_id="XYZ", name="Test User", workspace=workspace)
+    return d.User(
+        id=_u_id(1),
+        external_id="XYZ",
+        name="Test User",
+        email=None,
+        password_hash=None,
+        workspace=workspace,
+    )
 
 
 class TestQueryPhenotype:
     def test_query_public_phenotype(self, session: MockSession, user: d.User):
         session = MockSession()
 
-        public_user = d.User(d.PUBLIC_USER_ID, "PBLC", "Everyone", None)
-        other_user = d.User(_u_id(2), "DEV2", "Test 2", None)
+        public_user = d.User(
+            id=d.PUBLIC_USER_ID,
+            external_id="PBLC",
+            name="Everyone",
+            email=None,
+            password_hash=None,
+            workspace=None,
+        )
+        other_user = d.User(
+            id=_u_id(2),
+            external_id="DEV2",
+            name="Test 2",
+            email=None,
+            password_hash=None,
+            workspace=None,
+        )
 
         collection = create_Collection(
             shared_with={public_user}, _owner_id=other_user.id

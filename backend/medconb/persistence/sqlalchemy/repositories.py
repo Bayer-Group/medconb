@@ -66,6 +66,9 @@ class UserRepository:
             select(d.User).where(t.user.c.external_id == external_id)
         )
 
+    def get_by_email(self, email: str) -> Optional[d.User]:
+        return self.session.scalar(select(d.User).where(t.user.c.email == email))
+
     def new_id(self) -> d.UserID:
         return d.UserID(bytes=os.urandom(16), version=4)
 

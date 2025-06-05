@@ -113,4 +113,16 @@ def test_data():
 
     _print_workspace(workspace, collections, codelists)
 
-    return d.User(_u_id(1), "VERA", "name", workspace), collections, codelists
+    # password: admin
+    return (
+        d.User(
+            id=_u_id(1),
+            email="vera@example.com",
+            password_hash="$argon2id$v=19$m=65536,t=3,p=4$uk68cBfhSnypEF9cmLvV0w$5T0JdIF75qfxQLf9g3OiEZbfGKYeCvDBCZn4mhGuKHM",  # noqa
+            external_id="VERA",
+            name="name",
+            workspace=workspace,
+        ),
+        collections,
+        codelists,
+    )

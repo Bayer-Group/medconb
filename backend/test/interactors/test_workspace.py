@@ -21,8 +21,22 @@ class TestQueryCollection:
     def test_query_public_collection(self, session: MockSession, user: d.User):
         session = MockSession()
 
-        public_user = d.User(d.PUBLIC_USER_ID, "PBLC", "Everyone", None)
-        other_user = d.User(_u_id(2), "DEV2", "Test 2", None)
+        public_user = d.User(
+            id=d.PUBLIC_USER_ID,
+            external_id="PBLC",
+            name="Everyone",
+            email=None,
+            password_hash=None,
+            workspace=None,
+        )
+        other_user = d.User(
+            id=_u_id(2),
+            external_id="DEV2",
+            name="Test 2",
+            email=None,
+            password_hash=None,
+            workspace=None,
+        )
 
         collection = create_Collection(
             shared_with={public_user}, _owner_id=other_user.id
@@ -247,7 +261,16 @@ class TestSetCollectionPermissions:
     def test_execute_successful(self, session: Session, user: d.User):
         collection = create_Collection()
         user.workspace.add_collection(collection.id)
-        shared_users = [d.User(_u_id(1), "", "", None)]
+        shared_users = [
+            d.User(
+                id=_u_id(1),
+                external_id="",
+                name="",
+                email=None,
+                password_hash=None,
+                workspace=None,
+            )
+        ]
         session.collection_repository.get.return_value = collection
         session.user_repository.get_all.return_value = shared_users
 

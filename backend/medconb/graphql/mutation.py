@@ -35,3 +35,6 @@ mutation.set_field(
 )
 
 mutation.set_field("updateMe", InteractorResolver(interactors.UpdateMe))
+
+mutation.set_field("registerUser", InteractorResolver(interactors.RegisterUser))
+mutation.set_field("login", InteractorResolver(interactors.Login))

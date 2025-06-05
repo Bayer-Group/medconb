@@ -119,6 +119,8 @@ class Author(User):
     def from_user(user: "User"):
         return Author(
             id=user.id,
+            email=user.email,
+            password_hash=user.password_hash,
             external_id=user.external_id,
             name=user.name,
             workspace=Workspace(WorkspaceID(int=0)),

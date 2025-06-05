@@ -1,11 +1,17 @@
+import time
 from unittest.mock import MagicMock
 
 import confuse  # type: ignore
+import jwt
 import pytest
 
 import medconb.domain as d
-from medconb.domain import Collection, ItemType, Ontology, User
-from medconb.middleware import AuthBackend, AzureADAuthenticator, DevAuthenticator
+from medconb.middleware import (
+    AuthBackend,
+    AzureADAuthenticator,
+    DevAuthenticator,
+    PasswordAuthenticator,
+)
 from medconb.types import Session
 
 from ..helper import _c_id, _u_id
@@ -21,8 +27,22 @@ class TestDevAuthenticator:
 
     def test_success(self, config):
         init_session, conn_session = MagicMock(Session), MagicMock(Session)
-        init_session.user_repository.get.return_value = User(_u_id(1), "", "name", None)
-        conn_session.user_repository.get.return_value = User(_u_id(1), "", "name", None)
+        init_session.user_repository.get.return_value = d.User(
+            id=_u_id(1),
+            external_id="",
+            name="name",
+            email=None,
+            password_hash=None,
+            workspace=None,
+        )
+        conn_session.user_repository.get.return_value = d.User(
+            id=_u_id(1),
+            external_id="",
+            name="name",
+            email=None,
+            password_hash=None,
+            workspace=None,
+        )
 
         authenticator = DevAuthenticator(config, init_session)
         authenticator.authenticate(conn_session, "test_dev_token")
@@ -121,8 +141,13 @@ class TestAzureADAuthenticator:
 
     def test_load_existing_user(self):
         conn_session = MagicMock(Session)
-        conn_session.user_repository.getByExternalID.return_value = User(
-            id=_u_id(1), external_id="", name="name", workspace=None
+        conn_session.user_repository.getByExternalID.return_value = d.User(
+            id=_u_id(1),
+            external_id="",
+            name="name",
+            email=None,
+            password_hash=None,
+            workspace=None,
         )
 
         config = confuse.Configuration("MedConB", __name__)
@@ -147,18 +172,18 @@ class TestAzureADAuthenticator:
         conn_session.user_repository.getByExternalID.return_value = None
         conn_session.user_repository.new_id.return_value = _u_id(1)
         conn_session.collection_repository.new_id.return_value = _c_id(99)
-        conn_session.collection_repository.get.return_value = Collection(
+        conn_session.collection_repository.get.return_value = d.Collection(
             id=_c_id(99),
             name="",
             description="",
-            item_type=ItemType.Codelist,
+            item_type=d.ItemType.Codelist,
             item_ids=[],
             shared_with=set(),
             _owner_id=_u_id(1),
         )
         conn_session.ontology_repository.get_all.return_value = [
-            Ontology("ICD-10-CM", []),
-            Ontology("ICD-9-CM", []),
+            d.Ontology("ICD-10-CM", []),
+            d.Ontology("ICD-9-CM", []),
         ]
 
         conn_session.property_repository.get_all.return_value = [
@@ -221,8 +246,10 @@ class TestAzureADAuthenticator:
         assert len(got.workspace.collection_ids) > 0
 
         add_calls = conn_session.add.call_args_list
-        cnt_added_user = sum([1 for c in add_calls if isinstance(c[0][0], User)])
-        cnt_added_coll = sum([1 for c in add_calls if isinstance(c[0][0], Collection)])
+        cnt_added_user = sum([1 for c in add_calls if isinstance(c[0][0], d.User)])
+        cnt_added_coll = sum(
+            [1 for c in add_calls if isinstance(c[0][0], d.Collection)]
+        )
 
         assert cnt_added_user == 1
         assert cnt_added_coll > 0
@@ -252,7 +279,14 @@ class TestAuthBackend:
 
             @property
             def user(self):
-                return User(_u_id(1), "", "name", None)
+                return d.User(
+                    id=_u_id(1),
+                    external_id="",
+                    name="name",
+                    email=None,
+                    password_hash=None,
+                    workspace=None,
+                )
 
         init_session = MagicMock(Session)
 
@@ -310,3 +344,115 @@ class TestAuthBackend:
         assert await backend.authenticate(conn) is None
 
         conn.headers.get.assert_called_once_with("Authorization", None)
+
+
+class TestPasswordAuthenticator:
+    @pytest.fixture
+    def config(self):
+        config = confuse.Configuration("MedConB", __name__)
+        config["secret"] = "test_secret"
+        return config
+
+    def test_success(self, config, monkeypatch):
+        # Create a valid token
+        payload = {"sub": "user-123"}
+        token = jwt.encode(payload, "test_secret", algorithm="HS256")
+
+        conn_session = MagicMock(Session)
+        user = d.User(
+            id="user-123",
+            external_id="",
+            name="name",
+            email="",
+            password_hash="",
+            workspace=None,
+        )
+        conn_session.user_repository.get.return_value = user
+
+        authenticator = PasswordAuthenticator(config)
+        authenticator.authenticate(conn_session, token)
+
+        assert authenticator.user == user
+        assert authenticator.credentials is not None
+        assert authenticator.error is None
+        conn_session.user_repository.get.assert_called_once_with("user-123")
+
+    def test_invalid_token(self, config):
+        conn_session = MagicMock(Session)
+
+        authenticator = PasswordAuthenticator(config)
+        authenticator.authenticate(conn_session, "not_a_jwt_token")
+
+        assert authenticator.user is None
+        assert authenticator.credentials is None
+        assert authenticator.error is not None
+        assert str(authenticator.error) == "Invalid Bearer token"
+
+    def test_user_not_found(self, config, monkeypatch):
+        payload = {"sub": "user-456"}
+        token = jwt.encode(payload, "test_secret", algorithm="HS256")
+
+        conn_session = MagicMock(Session)
+        conn_session.user_repository.get.return_value = None
+
+        authenticator = PasswordAuthenticator(config)
+        authenticator.authenticate(conn_session, token)
+
+        assert authenticator.user is None
+        assert authenticator.credentials is None
+        assert authenticator.error is not None
+        assert str(authenticator.error) == "User is not available anymore"
+        conn_session.user_repository.get.assert_called_once_with("user-456")
+
+    def test_expired_token(self, config):
+        # Create an expired token
+        payload = {"sub": "user-789", "exp": int(time.time()) - 10}
+        token = jwt.encode(payload, "test_secret", algorithm="HS256")
+
+        conn_session = MagicMock(Session)
+
+        authenticator = PasswordAuthenticator(config)
+        authenticator.authenticate(conn_session, token)
+
+        assert authenticator.user is None
+        assert authenticator.credentials is None
+        assert authenticator.error is not None
+        assert str(authenticator.error) == "Invalid Bearer token"
+
+    def test_wrong_secret(self, config):
+        # Create a token with a different secret
+        payload = {"sub": "user-999"}
+        wrong_secret_token = jwt.encode(payload, "wrong_secret", algorithm="HS256")
+
+        conn_session = MagicMock(Session)
+
+        authenticator = PasswordAuthenticator(config)
+        authenticator.authenticate(conn_session, wrong_secret_token)
+
+        assert authenticator.user is None
+        assert authenticator.credentials is None
+        assert authenticator.error is not None
+        assert str(authenticator.error) == "Invalid Bearer token"
+
+    def test_missing_secret(self):
+        config = confuse.Configuration("MedConB", __name__)
+        config["secret"] = ""
+
+        with pytest.raises(ValueError) as excinfo:
+            PasswordAuthenticator(config)
+        assert "Password based Login is misconfigured." in str(excinfo.value)
+
+    def test_forgot_call_authenticate(self, config):
+        authenticator = PasswordAuthenticator(config)
+
+        with pytest.raises(Exception) as excinfo:
+            authenticator.user
+        assert "authenticate was not called" in repr(excinfo.value)
+
+        with pytest.raises(Exception) as excinfo:
+            authenticator.credentials
+        assert "authenticate was not called" in repr(excinfo.value)
+
+        with pytest.raises(Exception) as excinfo:
+            authenticator.error
+        assert "authenticate was not called" in repr(excinfo.value)

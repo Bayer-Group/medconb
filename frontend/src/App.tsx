@@ -19,11 +19,10 @@ import Codesets from './codesets/Codesets'
 import HomeScreen from './search/HomeScreen'
 import EmptyPane from './collections/Empty'
 import {RootState} from './store'
-import {useMsal} from '@azure/msal-react'
-import asyncTokenLookup from './asyncTokenLookup'
-import {ApplicationContext} from './ApplicationProvider'
 import syncDB, {DBSyncError} from './syncDB'
 import useReset from './useReset'
+import {AuthContext} from './AuthProvider'
+import {getConfig} from './config'
 
 const {Paragraph} = Typography
 
@@ -32,7 +31,6 @@ export const MedConbUserContext = createContext<MedConbUserContextValue>({} as M
 
 export type AppProps = {
   showVersion: boolean
-  upgraded: boolean
 }
 
 const ErrorFallback: Sentry.FallbackRender = ({error, resetError}) => {
@@ -109,16 +107,18 @@ const router = createHashRouter([
   },
 ])
 
-const App: React.FC<AppProps> = ({upgraded}) => {
+const App: React.FC<AppProps> = () => {
   const {onError} = useContext(ErrorHandlerContext)
-  const {config} = useContext(ApplicationContext)
-  const {instance} = useMsal()
   const client = useApolloClient()
   const [loading, setLoading] = useState(true)
   const [dbSyncProgress, setDbSyncProgress] = useState<number>()
   const [appUserData, setAppUserData] = useState<MedConbUserContextValue>({} as MedConbUserContextValue)
   const changeSet = useSelector((state: RootState) => state.changes.changeSet)
   const [dbSyncError, setDbSyncError] = useState<string>()
+
+  const config = getConfig()
+
+  const {getTokenAsync} = useContext(AuthContext)
 
   const syncing = useSelector((state: RootState) => state.changes.syncing)
 
@@ -130,7 +130,7 @@ const App: React.FC<AppProps> = ({upgraded}) => {
       try {
         await syncDB({
           baseUrl: config.graphql_endpoints[0].replace('graphql/', ''),
-          tokenLookup: async () => await asyncTokenLookup(instance, config),
+          tokenLookup: async () => await getTokenAsync(),
           onProgress: (progress) => setDbSyncProgress(progress),
         })
       } catch (e: any) {

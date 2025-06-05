@@ -1,3 +1,4 @@
+from .auth import Login, RegisterUser
 from .base import (
     CodelistNotExistsException,
     CollectionNotExistsException,

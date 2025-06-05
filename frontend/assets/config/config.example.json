@@ -1,8 +1,13 @@
 {
   "graphql_endpoint": "http://localhost:8000/graphql/",
   "graphql_endpoints": ["http://localhost:8000/graphql/"],
-  "dev_token": "any-bearer-token",
   "show_version": true,
+  "loginOptions": {
+    "dev": true,
+    "msal": true,
+    "email": true
+  },
+  "dev_token": "any-bearer-token",
   "msal": {
     "auth": {
       "clientId": "your-application-id",

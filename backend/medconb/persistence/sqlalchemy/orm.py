@@ -168,6 +168,8 @@ user = Table(
     "user",
     mapper_registry.metadata,
     Column("id", UUID, primary_key=True),
+    Column("email", String, nullable=True),
+    Column("password_hash", String, nullable=True),
     Column("external_id", String, nullable=True),
     Column("name", String, nullable=False),
     Column("properties", MutableDict.as_mutable(PropertyBagType), nullable=False),  # type: ignore[arg-type] # noqa

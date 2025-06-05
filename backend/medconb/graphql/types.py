@@ -300,3 +300,21 @@ class ImportReport:
 class ImportCodelistsResponseDto:
     stats: ImportStats
     reports: list[ImportReport]
+
+
+@dataclass
+class RegisterUserRequestDto:
+    email: str
+    password: str
+    name: str
+
+
+@dataclass
+class LoginRequestDto:
+    email: str
+    password: str
+
+
+@dataclass
+class TokenPayloadResponseDto:
+    token: str

@@ -20,6 +20,7 @@ dependencies:
   - xz=5.2.6
   - pip:
     - anyio==3.6.1
+    - argon2-cffi==23.1.0
     - ariadne==0.16.1
     - async-timeout==4.0.2
     - authlib==1.1.0
@@ -41,6 +42,7 @@ dependencies:
     - pycparser==2.21
     - pydantic==2.4.2
     - pydantic-core==2.10.1
+    - PyJWT==2.8.0
     - pyparsing==2.4.0
     - pyyaml==6.0
     - redis==4.3.5

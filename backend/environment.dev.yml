@@ -5,6 +5,7 @@ dependencies:
   - python=3.10
   - pip
   - pip:
+    - argon2-cffi
     - ariadne
     - authlib
     - confuse
@@ -12,6 +13,7 @@ dependencies:
     - plyse==1.0.3
     - psycopg2-binary
     - pydantic==2.*
+    - PyJWT==2.8.0
     - pyparsing==2.4.0
     - pyyaml
     - redis

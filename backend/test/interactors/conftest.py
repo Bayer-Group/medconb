@@ -16,7 +16,14 @@ from ..helper import _u_id
 @pytest.fixture
 def user():
     workspace = d.Workspace(id="workspace_id", collection_ids=[])
-    return d.User(id=_u_id(1), external_id="XYZ", name="Test User", workspace=workspace)
+    return d.User(
+        id=_u_id(1),
+        external_id="XYZ",
+        name="Test User",
+        email=None,
+        password_hash=None,
+        workspace=workspace,
+    )
 
 
 @pytest.fixture

@@ -1,10 +1,10 @@
 import {useCallback, useContext} from 'react'
-import {ApplicationContext} from './ApplicationProvider'
+import {AppContext} from './AppProvider'
 import {useDispatch} from 'react-redux'
 import localforage from 'localforage'
 
 const useReset = () => {
-  const {reduxPersistor} = useContext(ApplicationContext)
+  const {reduxPersistor} = useContext(AppContext)
   const dispatch = useDispatch()
 
   const handleReset = useCallback(async () => {

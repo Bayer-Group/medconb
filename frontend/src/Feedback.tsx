@@ -1,7 +1,7 @@
 import {MessageOutlined} from '@ant-design/icons'
 import {Button, FloatButton, Form, Input, Popover} from 'antd'
 import {useContext} from 'react'
-import {ApplicationContext} from './ApplicationProvider'
+import {getConfig} from './config'
 
 const {TextArea} = Input
 
@@ -15,7 +15,7 @@ const Feedback = () => {
 
 const FeedbackForm = () => {
   const [form] = Form.useForm()
-  const {config} = useContext(ApplicationContext)
+  const config = getConfig()
 
   const handleSumbit = (values: any) => {
     const message = `### ${values.title}%0D%0D%0D${values.message.replace(/\n/g, '%0D')}

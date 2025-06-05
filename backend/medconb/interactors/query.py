@@ -119,6 +119,8 @@ class Users(BaseInteractor):
         return [
             d.User(
                 id=u.id,
+                email=u.email,
+                password_hash=u.password_hash,
                 external_id=u.external_id,
                 name=u.name,
                 workspace=d.Workspace(d.WorkspaceID(int=0)),

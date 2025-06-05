@@ -5,12 +5,14 @@ dependencies:
   - python=3.10
   - pip
   - pip:
+    - argon2-cffi
     - ariadne
     - authlib
     - confuse
     - pandas
     - psycopg2-binary
     - pydantic
+    - PyJWT
     - pyyaml
     - sqlalchemy
     - starlette

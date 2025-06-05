@@ -233,6 +233,8 @@ def resolve_commit_author(commit: d.Commit, info) -> d.Author:
     if user is None:
         return d.Author(
             id=session.user_repository.new_id(),
+            email=None,
+            password_hash=None,
             external_id="00000",
             name="deleted user",
             workspace=d.Workspace(d.WorkspaceID(int=0)),

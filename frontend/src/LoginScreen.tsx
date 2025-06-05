@@ -1,66 +1,172 @@
-import {useMsal} from '@azure/msal-react'
-import {EventType} from '@azure/msal-browser'
 import {styled} from '@linaria/react'
-import {Button} from 'antd'
-import React, {useCallback, useContext, useEffect} from 'react'
-import MSALContext from './MSALContext'
-import jwt_decode from 'jwt-decode'
+import {Button, Form, Input, Divider} from 'antd'
+import React from 'react'
 import CompanyLogo from '../assets/images/company_logo_color.png'
-import localforage from 'localforage'
-import {ApplicationConfig} from '..'
+import MCBLogo from '../assets/images/MCBLogo@2x.png'
+
+type PasswordLoginFormValues = {
+  email: string
+  password: string
+}
+
+type RegistrationFormValues = {
+  email: string
+  password: string
+  confirm: string
+  name: string
+}
 
 type LoginScreenProps = {
-  enableDev?: boolean
-  config: ApplicationConfig
+  loginOptions: {dev: boolean; msal: boolean; password: boolean}
+  i18n: Record<string, string>
+  handleMsalLogin: () => void
+  handlePasswordLogin: (email: string, password: string) => void
+  passwordLoginMessage?: string
+  handleRegister: (email: string, password: string, name: string) => void
+  registrationMessage?: string
 }
-const LoginScreen: React.FC<LoginScreenProps> = ({enableDev = false, config}) => {
-  const {instance} = useMsal()
-  const {scopes} = useContext(MSALContext)
+const LoginScreen: React.FC<LoginScreenProps> = ({
+  loginOptions,
+  i18n,
+  handleMsalLogin,
+  handlePasswordLogin,
+  passwordLoginMessage,
+  handleRegister,
+  registrationMessage,
+}) => {
+  const [form] = Form.useForm()
+  const [registerForm] = Form.useForm()
+  const [isRegister, setIsRegister] = React.useState(false)
 
-  useEffect(() => {
-    const cb = instance.addEventCallback(async (message: any) => {
-      if (message.eventType === EventType.LOGIN_SUCCESS) {
-        const info = jwt_decode<any>(message.payload.accessToken)
-        const storedSub: string | null = await localforage.getItem('__msal_sub')
+  const _handleEmailLogin = (values: PasswordLoginFormValues) => {
+    handlePasswordLogin(values.email, values.password)
+  }
 
-        if (storedSub && storedSub !== info.sub) {
-          await localforage.removeItem('persist:__MEDCONB__WORKSPACE')
-          await localforage.removeItem('persist:__MEDCONB__CHANGES')
-          await localforage.removeItem('persist:__MEDCONB__UI')
-        }
-        await localforage.setItem('__msal_sub', info.sub)
-      }
-    })
-
-    return () => {
-      if (cb) {
-        instance.removeEventCallback(cb)
-      }
+  const _handleRegister = (values: RegistrationFormValues) => {
+    if (values.password !== values.confirm) {
+      registerForm.setFields([{name: 'confirm', errors: ['Passwords do not match!']}])
+      return
     }
-  }, [])
-
-  const handleLogin = useCallback(() => {
-    instance.loginPopup({scopes}).catch((e) => {
-      console.error(e)
-    })
-  }, [])
+    handleRegister(values.email, values.password, values.name)
+  }
 
   return (
     <LoginRoot>
       <div>
         <Box>
-          <LogoContainer>
-            <img height="100%" src={CompanyLogo} />
-          </LogoContainer>
-          <Button type="primary" onClick={handleLogin}>
-            Sign in using your {config.i18n.companyName} account
-          </Button>
+          <LogoContainer66px>
+            <img height="100%" src={MCBLogo} />
+          </LogoContainer66px>
+          <Divider style={{margin: '16px 0'}} />
+          {loginOptions.password && !isRegister && (
+            <>
+              <Form
+                form={form}
+                layout="horizontal"
+                onFinish={_handleEmailLogin}
+                labelCol={{span: 8}}
+                wrapperCol={{span: 16}}>
+                <Form.Item label="Email" name="email" rules={[{required: true, message: 'Please input your email!'}]}>
+                  <Input type="email" placeholder="Enter your email" />
+                </Form.Item>
+                <Form.Item
+                  label="Password"
+                  name="password"
+                  rules={[{required: true, message: 'Please input your password!'}]}>
+                  <Input.Password placeholder="Enter your password" />
+                </Form.Item>
+                {passwordLoginMessage && (
+                  <Form.Item wrapperCol={{span: 24}}>
+                    <div style={{color: 'red', textAlign: 'center'}}>{passwordLoginMessage}</div>
+                  </Form.Item>
+                )}
+                <Form.Item wrapperCol={{span: 24}} style={{textAlign: 'center', marginBottom: 0}}>
+                  <Button type="primary" htmlType="submit">
+                    Sign in with Password
+                  </Button>
+                </Form.Item>
+                <Form.Item wrapperCol={{span: 24}} style={{textAlign: 'center', marginBottom: 0}}>
+                  <Button type="link" onClick={() => setIsRegister(true)}>
+                    Register new account
+                  </Button>
+                </Form.Item>
+              </Form>
+              <Divider style={{margin: '16px 0'}} />
+            </>
+          )}
+          {loginOptions.password && isRegister && (
+            <>
+              <Form
+                form={registerForm}
+                layout="horizontal"
+                onFinish={_handleRegister}
+                labelCol={{span: 8}}
+                wrapperCol={{span: 16}}>
+                <Form.Item
+                  initialValue="Bob"
+                  label="Name"
+                  name="name"
+                  rules={[{required: true, message: 'Please input your name!'}]}>
+                  <Input type="text" placeholder="Enter your name" />
+                </Form.Item>
+                <Form.Item
+                  initialValue="bob@example.com"
+                  label="Email"
+                  name="email"
+                  rules={[{required: true, message: 'Please input your email!'}]}>
+                  <Input type="email" placeholder="Enter your email" />
+                </Form.Item>
+                <Form.Item
+                  initialValue="123"
+                  label="Password"
+                  name="password"
+                  rules={[{required: true, message: 'Please input your password!'}]}>
+                  <Input.Password placeholder="Enter your password" />
+                </Form.Item>
+                <Form.Item
+                  initialValue="123"
+                  label="Confirm"
+                  name="confirm"
+                  dependencies={['password']}
+                  rules={[{required: true, message: 'Please confirm your password!'}]}>
+                  <Input.Password placeholder="Confirm your password" />
+                </Form.Item>
+                {registrationMessage && (
+                  <Form.Item wrapperCol={{span: 24}}>
+                    <div style={{color: 'red', textAlign: 'center'}}>{registrationMessage}</div>
+                  </Form.Item>
+                )}
+                <Form.Item wrapperCol={{span: 24}} style={{textAlign: 'center', marginBottom: 0}}>
+                  <Button type="primary" htmlType="submit">
+                    Register
+                  </Button>
+                </Form.Item>
+                <Form.Item wrapperCol={{span: 24}} style={{textAlign: 'center', marginBottom: 0}}>
+                  <Button type="link" onClick={() => setIsRegister(false)}>
+                    Back to Login
+                  </Button>
+                </Form.Item>
+              </Form>
+              <Divider style={{margin: '16px 0'}} />
+            </>
+          )}
+          {loginOptions.msal && !isRegister && (
+            <>
+              <LogoContainer100px>
+                <img height="100%" src={CompanyLogo} />
+              </LogoContainer100px>
+              <Button type="primary" onClick={handleMsalLogin} block>
+                Sign in using your {i18n.companyName} account
+              </Button>
+              <Divider style={{margin: '16px 0'}} />
+            </>
+          )}
+          {loginOptions.dev && !isRegister && (
+            <Button block type="text" onClick={() => (document.location.href = '?dev_auth=1')}>
+              Sign in using dev token
+            </Button>
+          )}
         </Box>
-        {enableDev && (
-          <Button block type="text" onClick={() => (document.location.href = '?dev_auth=1')}>
-            Sign in using dev token
-          </Button>
-        )}
       </div>
     </LoginRoot>
   )
@@ -84,10 +190,20 @@ const Box = styled.div`
   flex-direction: column;
   padding: 20px;
   justify-content: center;
+
+  > .ant-divider:last-child {
+    display: none;
+  }
 `
 
-const LogoContainer = styled.div`
+const LogoContainer100px = styled.div`
   height: 100px;
+  text-align: center;
+  margin-bottom: 20px;
+`
+
+const LogoContainer66px = styled.div`
+  height: 66px;
   text-align: center;
   margin-bottom: 20px;
 `

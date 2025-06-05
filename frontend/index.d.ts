@@ -2,27 +2,6 @@ export type CollectionItem = Codelist | Phenotype
 
 export type IntermediateType = 'FULL' | 'PARTIAL' | 'NONE'
 
-export type ApplicationConfig = {
-  graphql_endpoints: string[]
-  show_version: boolean
-  dev_token: ?string
-  msal: {
-    auth: {
-      clientId: string
-      authority: string
-      redirectUri: string
-    }
-    scopes: string[]
-  }
-  maintenance_mode: boolean
-  glitchtipDSN: string
-  i18n: {
-    companyName: string
-    feedbackEmail: string
-    [key: string]: string
-  }
-}
-
 export type Collection = {
   id: string
   name: string

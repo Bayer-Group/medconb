@@ -14,7 +14,9 @@ if typing.TYPE_CHECKING:
 @dataclass
 class User(BaseUser, PropertyBag):
     id: UserID
-    external_id: str
+    email: str | None
+    password_hash: str | None
+    external_id: str | None
     name: str
 
     workspace: "Workspace"
@@ -30,7 +32,7 @@ class User(BaseUser, PropertyBag):
 
     @property
     def display_name(self) -> str:
-        return self.external_id
+        return self.external_id or self.name
 
     @property
     def tutorial_state(self) -> str:

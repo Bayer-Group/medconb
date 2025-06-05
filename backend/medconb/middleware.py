@@ -5,6 +5,7 @@ from operator import attrgetter
 from typing import Optional, Protocol
 
 import confuse  # type: ignore
+import jwt
 import requests
 from authlib.jose import JsonWebToken, JWTClaims, errors  # type: ignore
 from pydantic import BaseModel
@@ -28,7 +29,7 @@ from .types import Session, sessionmaker
 
 # import only for typing
 if typing.TYPE_CHECKING:
-    from confuse import Configuration
+    from confuse import ConfigView
 
 logger = logging.getLogger(__name__)
 
@@ -64,12 +65,16 @@ class Authenticator(Protocol):  # pragma: no cover
 
 
 class AuthBackend(AuthenticationBackend):
-    def __init__(self, config: "Configuration", session: Session):
+    def __init__(self, config: "ConfigView", session: Session):
         self.authenticators: list[Authenticator] = []
 
         if config["ad"].exists():
             logger.info("Authorization method 'ad' is enabled")
             self.authenticators.append(AzureADAuthenticator(config["ad"], session))
+
+        if config["password"].exists():
+            logger.info("Authorization method 'password' is enabled")
+            self.authenticators.append(PasswordAuthenticator(config["password"]))
 
         if config["develop"].exists():
             logger.info("Authorization method 'develop' is enabled")
@@ -166,13 +171,62 @@ class DevAuthenticator:
             self._error = AuthenticationError("Invalid Bearer token")
 
 
+class PasswordAuthenticator:
+    def __init__(self, config: "ConfigView"):
+        self._secret = config["secret"].get(str)
+
+        if not self._secret:
+            raise ValueError("Password based Login is misconfigured.")
+
+        self._error: Exception | None = None
+        self._credentials: AuthCredentials | None = None
+        self._user: d.User | None = None
+
+    def authenticate(self, conn_session: Session, token: str) -> None:
+        try:
+            payload = jwt.decode(token, self._secret, algorithms=["HS256"])
+        except Exception as e:
+            print(f"Unable to decode Bearer Token: '{str(e)} :: {token}'")
+            self._error = AuthenticationError("Invalid Bearer token")
+            return
+
+        user_id = payload["sub"]
+        user = conn_session.user_repository.get(user_id)
+
+        if not user:
+            self._error = AuthenticationError("User is not available anymore")
+            return
+
+        user.set_authenticated(True)
+        self._credentials = AuthCredentials(["authenticated"])
+        self._user = user
+
+    @property
+    def error(self) -> Exception | None:
+        if self._error is None and self._user is None:
+            raise Exception("authenticate was not called")
+        return self._error
+
+    @property
+    def credentials(self) -> AuthCredentials | None:
+        if self._credentials is None and self._error is None:
+            raise Exception("authenticate was not called")
+        return self._credentials
+
+    @property
+    def user(self) -> d.User | None:
+        if self._user is None and self._error is None:
+            raise Exception("authenticate was not called")
+        return self._user
+
+
 class AzureADAuthenticator:
 
     class ClaimsConfig(BaseModel):
         name: str
         mapped_to: str
 
-    def __init__(self, config: "Configuration", session: Session):
+    def __init__(self, config: "ConfigView", session: Session):
         template = confuse.Sequence({"name": str, "mapped_to": str})
         extra_claims = [self.ClaimsConfig(**c) for c in config["claims"].get(template)]
 
@@ -240,31 +294,26 @@ class AzureADAuthenticator:
             raise Exception("authenticate was not called")
         return self._user
 
-    def authenticate(self, conn_session: Session, jwt: str):
+    def authenticate(self, conn_session: Session, token: str):
         self._user = None
         self._credentials = None
         self._error = None
 
         try:
-            claims = self._extract_claims(jwt)
+            claims = self._extract_claims(token)
             self._credentials = AuthCredentials(["authenticated"])
             self._user = self._load_user(conn_session, claims)
-        except errors.DecodeError:
-            print(f"Unable to decode Bearer Token: '{jwt}'")
+        except Exception as e:
+            print(f"Unable to decode Bearer Token: '{e} :: {token}'")
             self._error = AuthenticationError("Unable to decode Bearer token")
-        except (
-            errors.InvalidClaimError,
-            errors.MissingClaimError,
-            errors.ExpiredTokenError,
-        ) as e:
-            print(f"Unable to decode Bearer fvfvfToken: '{e.description} :: {jwt}'")
-            self._error = AuthenticationError(e.description)
 
     def _extract_claims(self, token) -> JWTClaims:
         """
         decodes and validates the jwt token, assuming RS256 algorithm; returns claims
         """
         jwt = JsonWebToken(["RS256"])
+
+        claims = None
 
         for try_nr in range(3):
             try:
@@ -285,6 +334,9 @@ class AzureADAuthenticator:
                     self._configure_ad()
                 else:
                     raise e
+
+        if not claims:
+            raise errors.DecodeError("Invalid Bearer token")
 
         return claims
 
@@ -342,6 +394,8 @@ class AzureADAuthenticator:
 
         user = d.User(
             id=session.user_repository.new_id(),
+            email=claims["email"] if "email" in claims else None,
+            password_hash=None,
             external_id=external_id,
             name=name,
             workspace=d.Workspace(id=session.user_repository.new_workspace_id()),

@@ -5,7 +5,6 @@ import {App, Button, Dropdown, Modal, Progress, Space, Spin} from 'antd'
 import {Outlet, useNavigate, useLocation, useParams, useSearchParams} from 'react-router-dom'
 import Sidebar from './Sidebar'
 import {findIndex, isEmpty, isNil, startsWith} from 'lodash'
-import {UserContext} from './UserAccessGate'
 import {MenuInfo} from 'rc-menu/lib/interface'
 import Icon from '@ant-design/icons/lib/components/Icon'
 import {useIsAuthenticated, useMsal} from '@azure/msal-react'
@@ -25,16 +24,15 @@ import MarkdownDisplayComponent from './components/MarkdownDisplayComponent'
 import MedconbTour from './tours/MedconbTour'
 import Settings from './Settings'
 import AppResetModal from './AppResetModal'
-import localforage from 'localforage'
-import {ApplicationContext} from './ApplicationProvider'
 import useReset from './useReset'
+import {AuthContext} from './AuthProvider'
+import {getConfig} from './config'
 
 const RootWorkspace = () => {
   const {instance} = useMsal()
   const {modal} = App.useApp()
   const {id, type} = useParams()
   const client = useApolloClient()
-  const {config, reduxPersistor} = useContext(ApplicationContext)
   const dispatch = useDispatch()
   const isAUthenticated = useIsAuthenticated()
   const navigate = useNavigate()
@@ -46,10 +44,12 @@ const RootWorkspace = () => {
   const sideBarOpen = useSelector((state: RootState) => state.ui.sideBarOpen)
   const searchParams = useSelector((state: RootState) => state.ui.searchParams)
 
+  const config = getConfig()
+
   const [queryParams, setSearchParams] = useSearchParams()
 
   const location = useLocation()
-  const {token} = useContext(UserContext)
+  const {username} = useContext(AuthContext)
   // const [tourOpen, setTourOpen] = useState(false)
   const tabsRef = createRef<TabsHandleType>()
 
@@ -270,12 +270,10 @@ const RootWorkspace = () => {
         <Toolbar>
           {/* <Button onClick={() => navigate('codeset')}>ONTOLOGY VIEWER</Button> */}
           <Space align="center">
-            {token && (
-              <Space align="center">
-                <Icon component={() => <UserIcon fill={'#262626'} />} style={{fontSize: 16, marginTop: 4}} />
-                {token.name}
-              </Space>
-            )}
+            <Space align="center">
+              <Icon component={() => <UserIcon fill={'#262626'} />} style={{fontSize: 16, marginTop: 4}} />
+              {username}
+            </Space>
             <Dropdown menu={{onClick: handleMenuClick, items: menuItems}} trigger={['click']}>
               <Button onClick={(e) => e.stopPropagation()} size="small" type="text" icon={<MenuOutlined />}></Button>
             </Dropdown>
