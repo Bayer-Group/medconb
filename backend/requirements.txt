@@ -23,7 +23,7 @@ pydantic-core==2.10.1
 pyparsing==2.4.0
 pyyaml==6.0
 redis==4.3.5
-requests==2.28.1
+requests==2.32.4
 sniffio==1.3.0
 sqlalchemy==2.0.20
 starlette==0.20.4
