@@ -29,6 +29,6 @@ sqlalchemy==2.0.20
 starlette==0.20.4
 starlette-context==0.3.6
 typing-extensions==4.7.1
-urllib3==1.26.13
+urllib3==2.5.0
 uvicorn==0.18.3
 wrapt==1.14.1
