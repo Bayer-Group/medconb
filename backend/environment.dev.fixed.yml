@@ -109,7 +109,7 @@ dependencies:
     - snowballstemmer==2.2.0
     - sqlalchemy==2.0.20
     - stack-data==0.5.1
-    - starlette==0.20.4
+    - starlette==0.47.2
     - starlette-context==0.3.6
     - tomli==2.0.1
     - traitlets==5.4.0
