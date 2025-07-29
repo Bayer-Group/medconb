@@ -18,7 +18,7 @@ dependencies:
     - pyyaml
     - redis
     - requests
-    - sqlalchemy==2.*
+    - sqlalchemy==2.0.*
     - starlette
     - starlette-context
     - uvicorn

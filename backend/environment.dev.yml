@@ -17,7 +17,7 @@ dependencies:
     - pyparsing==2.4.0
     - pyyaml
     - redis
-    - sqlalchemy==2.*
+    - sqlalchemy==2.0.*
     - starlette
     - starlette-context
     - uvicorn
@@ -28,7 +28,7 @@ dependencies:
     - ipython
     - isort==5.*
     - mccabe
-    - mypy
+    - mypy==1.10.1  # can't upgrade mypy above 1.10.1, because of sqlalchemy (waiting for v2.1)
     - pycodestyle
     - pyflakes
     - pytest
