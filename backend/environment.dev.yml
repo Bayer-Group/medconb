@@ -6,7 +6,7 @@ dependencies:
   - pip
   - pip:
     - argon2-cffi
-    - ariadne==0.25.*
+    - ariadne==0.26.*
     - authlib
     - confuse
     - pandas
