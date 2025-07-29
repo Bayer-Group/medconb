@@ -23,7 +23,7 @@ dependencies:
     - appnope==0.1.4
     - argon2-cffi==25.1.0
     - argon2-cffi-bindings==21.2.0
-    - ariadne==0.17.1
+    - ariadne==0.25.2
     - asttokens==2.0.8
     - async-timeout==5.0.1
     - attrs==22.1.0
