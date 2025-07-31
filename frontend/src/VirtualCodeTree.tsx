@@ -200,14 +200,19 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
 
   const isTruncated = ontology.is_linear && codes.length >= MAX_CODES
   const listHeight = !isTruncated ? height : height - 56
+  const noCodesToShow = codes.length === 0
+
+  if (noCodesToShow) {
+    return <CodeTreeWarning>No codes to display. Please adjust your filters or search criteria.</CodeTreeWarning>
+  }
 
   return (
     <>
       {isTruncated && (
-        <TruncatedWarning>
+        <CodeTreeWarning>
           Only the first {MAX_CODES.toLocaleString()} codes are displayed due to browser limits. Please use the search
           or filters to see more.
-        </TruncatedWarning>
+        </CodeTreeWarning>
       )}
       <List
         ref={listRef}
@@ -397,7 +402,7 @@ export const ListCode: React.FC<ListCodeProps & {style: CSSProperties}> = memo(
   areEqual,
 )
 
-const TruncatedWarning = styled.div`
+const CodeTreeWarning = styled.div`
   padding: 16px;
   color: #b00;
   background: #fffbe6;
