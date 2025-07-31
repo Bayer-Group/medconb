@@ -106,7 +106,7 @@ class CodeRepository(Protocol):  # pragma: no cover
     ) -> dict[str, int | None]: ...
 
     def search_codes(
-        self, query_data: d.QueryData, ontology_id: str
+        self, query_data: d.QueryData, ontology_id: str, limit: int | None = None
     ) -> list[d.Code]: ...
 
 

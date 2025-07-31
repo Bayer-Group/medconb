@@ -32,7 +32,9 @@ class Codes(BaseInteractor):
 
 class SearchCodes(BaseInteractor):
     def __call__(self, dto: gql.SearchCodesRequestDto) -> list[d.Code]:
-        return self.code_repository.search_codes(dto.query, dto.ontology_id)
+        return self.code_repository.search_codes(
+            dto.query, dto.ontology_id, limit=10000
+        )
 
 
 class SearchEntities(BaseInteractor):

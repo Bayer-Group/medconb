@@ -72,7 +72,8 @@ const OntologyListView: React.FC<OntologyListViewProps & {height: number}> = ({
     let _filteredCodes = unfilteredCodes
 
     if (filteredCodes) {
-      const filteredCodeIds = filteredCodes.map((c) => c.id)
+      // TODO: can the ids be handled as numbers?
+      const filteredCodeIds = filteredCodes.map((c) => c.id.toString())
       _filteredCodes = _filteredCodes.filter((code) => filteredCodeIds.includes(code))
     }
 

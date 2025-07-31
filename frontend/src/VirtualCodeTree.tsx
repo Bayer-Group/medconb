@@ -101,6 +101,7 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
 
   const filterCodes = (showLoader = false) => {
     if (showLoader) {
+      console.time(`filterCodes`)
       dispatch(startAppLoading())
     }
 
@@ -119,6 +120,7 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
       listRef.current?.resetAfterIndex(0)
       if (showLoader) {
         dispatch(doneAppLoading())
+        console.timeEnd(`filterCodes`)
       }
     }, 1)
   }
@@ -144,7 +146,7 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
       if (searchResults) {
         // filter descendants with the search result
         const filteredBySearch = calculateFilteredCodes(searchResults)
-        const filteredIds = new Set(filteredBySearch.map((c) => Number(c.id)))
+        const filteredIds = new Set(filteredBySearch.map((c) => c.id))
         descendants = Array.from(new Set(descendants).intersection(filteredIds))
       }
 
@@ -181,6 +183,7 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
     },
     [searchResults, computedValue],
   )
+
   const getItemSize = (index: number) => {
     if (codes[index].fd) return 34.84
     const nextCode = codes.at(index + 1)
@@ -195,32 +198,31 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
     return 26.84
   }
 
-  const codesToRender = codes.length > MAX_CODES ? codes.slice(0, MAX_CODES) : codes
-  const isTruncated = codes.length > MAX_CODES
+  const isTruncated = ontology.is_linear && codes.length >= MAX_CODES
   const listHeight = !isTruncated ? height : height - 56
 
   return (
     <>
       {isTruncated && (
         <TruncatedWarning>
-          Showing first {MAX_CODES.toLocaleString()} codes only due to browser limits. Please use the search or filters
-          to see more.
+          Only the first {MAX_CODES.toLocaleString()} codes are displayed due to browser limits. Please use the search
+          or filters to see more.
         </TruncatedWarning>
       )}
       <List
         ref={listRef}
         className="treeview"
         height={listHeight}
-        itemCount={codesToRender.length}
+        itemCount={codes.length}
         itemSize={getItemSize}
         width={'100%'}>
         {({index, style}) => {
-          const code = codesToRender[index]
+          const code = codes[index]
           return (
             <ListCode
               key={code.id}
               code={code}
-              nextCode={codesToRender.at(index + 1)}
+              nextCode={codes.at(index + 1)}
               search={search}
               concepts={concepts}
               toggleCode={toggleCode}

@@ -15,7 +15,7 @@ import SelectOntology from './components/SelectOntology'
 import {CloseIcon, FilterIcon} from './customIcons'
 import {db} from './db'
 import FilterComponent, {Filter} from './FilterComponent'
-import {FETCH_CODE_LIST, SEARCH_CODES} from './graphql'
+import {FETCH_CODE_LIST, SEARCH_CODES, SEARCH_CODES_LINEAR} from './graphql'
 import OntologyListView from './OntologyListView'
 import {RootState} from './store'
 import {addOpenNodes, collapseAllNodes, doneAppLoading, setOpenNodes, startAppLoading} from './store/ui'
@@ -23,6 +23,7 @@ import {
   clearSearch,
   PaneState,
   ReadMode,
+  SearchResultState,
   setPaneFilter,
   setPaneFilteredCodes,
   setPaneOntology,
@@ -34,6 +35,8 @@ import {
 import {calculateFilteredCodes} from './treeUtils'
 import {combineLatest} from './utils'
 import VirtualCodeTree, {VCodeTreeHandle} from './VirtualCodeTree'
+
+const MAX_CODES = 100000
 
 type OntologyViewerProps = {
   // ontologies: Ontology[]
@@ -50,21 +53,34 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
   const [codesAreStale, setCodesAreStale] = useState(false)
   const ontologies = useLiveQuery(() => db.ontologies.toArray())
   const codes = useLiveQuery(() => {
+    if (!ontologies) return []
+    let ontology = ontologies.find((o) => o.name === pane.ontology)
+    if (!ontology) throw new Error('Ontology not found')
+
     console.time(`queryOntologyCodes`)
-    return db.codes
-      .where({ontology_id: pane.ontology})
-      .toArray()
-      .finally(() => {
-        console.timeEnd(`queryOntologyCodes`)
-        setCodesAreStale(false)
-      })
-  }, [pane.ontology])
+    let query = db.codes.where({ontology_id: pane.ontology})
+
+    if (ontology.is_linear) {
+      if (pane.filteredCodes && pane.filteredCodes.length > 0) {
+        const filteredIds = new Set(pane.filteredCodes.map((c) => c.id))
+        query = query.filter((c) => filteredIds.has(c.id))
+      } else {
+        query = query.limit(MAX_CODES)
+      }
+    }
+
+    return query.toArray().finally(() => {
+      console.timeEnd(`queryOntologyCodes`)
+      setCodesAreStale(false)
+    })
+  }, [pane.ontology, pane.filteredCodes, ontologies])
   const ontology = (ontologies ?? []).find((o) => o.name === pane.ontology)
 
   const codeTreeRef = useRef<VCodeTreeHandle>(null)
   const [codelists, setMedicalConcepts] = useState<Codelist[]>([])
 
   const [searchCodes] = useLazyQuery(SEARCH_CODES)
+  const [searchCodesLinear] = useLazyQuery(SEARCH_CODES_LINEAR)
 
   const indicators = useSelector((state: RootState) => state.workspace.indicators)
   const openConcepts = useSelector((state: RootState) => state.workspace.openCodelists)
@@ -273,48 +289,60 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
     // return <Menu key={pane.id} onClick={handleMenuClick} items={menuItems} />
   }, [onPaneAdd, codelists])
 
-  const onSearch = async (f: Filter) => {
-      // dispatch(setPaneBusy({paneId: pane.id}))
-      dispatch(startAppLoading())
-      try {
-        const query: any = {}
+  const onSearch = async (f: Filter): Promise<SearchResultState[]> => {
+    // dispatch(setPaneBusy({paneId: pane.id}))
+    dispatch(startAppLoading())
+    try {
+      const query: any = {}
 
-        if (f.code.trim() !== '') {
-          query['code'] = {
-            value: f.code,
-            type: f.mode,
-          }
-        } else {
-          query['code'] = null
+      if (f.code.trim() !== '') {
+        query['code'] = {
+          value: f.code,
+          type: f.mode,
         }
-
-        const description = f.description //https://stackoverflow.com/a/66721429/876117
-          .replace(/^[\p{P}\p{S}]+/gu, '')
-          .replace(/[\p{P}\p{S}]+$/gu, '')
-          .trim()
-
-        if (description !== '') {
-          query['description'] = description
-        }
-
-        if (isEmpty(query)) return
-
-        const res = await searchCodes({
-          variables: {
-            query,
-            ontologyID: pane.ontology,
-          },
-          // fetchPolicy: 'network-only',
-        })
-
-        return res.data.searchCodes
-      } catch (error) {
-        console.log(error)
-      } finally {
-        dispatch(setPaneFilter({paneId: pane.id, filter: f}))
-        dispatch(doneAppLoading())
-        // dispatch(clearPaneBusy({paneId: pane.id}))
+      } else {
+        query['code'] = null
       }
+
+      const description = f.description //https://stackoverflow.com/a/66721429/876117
+        .replace(/^[\p{P}\p{S}]+/gu, '')
+        .replace(/[\p{P}\p{S}]+$/gu, '')
+        .trim()
+
+      if (description !== '') {
+        query['description'] = description
+      }
+
+      if (isEmpty(query)) return []
+
+      let searchFunc = searchCodes
+
+      if (!ontology) console.log('WARNING: Ontology is not defined')
+
+      if (ontology && ontology.is_linear) {
+        searchFunc = searchCodesLinear
+      }
+
+      const res = await searchFunc({
+        variables: {
+          query,
+          ontologyID: pane.ontology,
+        },
+        // fetchPolicy: 'network-only',
+      })
+
+      return res.data.searchCodes.map((c: {id: string; path: {id: string}[]}) => ({
+        id: Number.parseInt(c.id),
+        path: c.path ? c.path.map((p) => Number.parseInt(p.id)) : [Number.parseInt(c.id)],
+      }))
+    } catch (error) {
+      console.log(error)
+    } finally {
+      dispatch(setPaneFilter({paneId: pane.id, filter: f}))
+      dispatch(doneAppLoading())
+      // dispatch(clearPaneBusy({paneId: pane.id}))
+    }
+    return []
   }
 
   const handleSearchClick = (f: Filter) => {
@@ -332,41 +360,20 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
       return
     }
 
-      onSearch(f)
-        .then((filteredCodes) => {
-          if (filteredCodes) {
-            if (pane.viewType === 'tree') {
-              const allPath: number[] = uniq(
-                flatten(
-                  calculateFilteredCodes(
-                    filteredCodes.map((c) => ({
-                      id: c.id,
-                      path: c.path.map((p) => p.id),
-                    })),
-                  ).map((c) => c.path.slice(0, -1).map((p) => Number(p))),
-                ),
-              )
-              // console.log(calculateFilteredCodes(filteredCodes), allPath)
-              dispatch(
-                addOpenNodes({
-                  ontology: ontology.name,
-                  codes: allPath,
-                }),
-              )
-            }
+    onSearch(f)
+      .then((filteredCodes) => {
+        if (!filteredCodes || !ontology) {
+          return
+        }
 
-            dispatch(
-              setPaneFilteredCodes({
-                paneId: pane.id,
-                codes: filteredCodes.map((c) => ({
-                  id: c.id,
-                  path: c.path.map((p) => p.id),
-                })),
-              }),
-            )
-          }
-        })
-        .catch(console.log)
+        if (pane.viewType === 'tree' && !ontology.is_linear) {
+          const allPath: number[] = uniq(flatten(calculateFilteredCodes(filteredCodes).map((c) => c.path.slice(0, -1))))
+          dispatch(addOpenNodes({ontology: ontology.name, codes: allPath}))
+        }
+
+        dispatch(setPaneFilteredCodes({paneId: pane.id, codes: filteredCodes}))
+      })
+      .catch(console.log)
   }
 
   const visibleCodelists = useMemo(

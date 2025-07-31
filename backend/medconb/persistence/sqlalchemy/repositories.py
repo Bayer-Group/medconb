@@ -637,7 +637,7 @@ class CodeRepository:
         return {r.code: r.id for r in res}
 
     def search_codes(  # noqa R901 - too complex
-        self, query_data: d.QueryData, ontology_id: str
+        self, query_data: d.QueryData, ontology_id: str, limit: int | None = None
     ) -> list[d.Code]:
         assert isinstance(d.Code.id, Mapped)
         assert isinstance(d.Code.path, Mapped)
@@ -673,6 +673,9 @@ class CodeRepository:
             .where(*filters)
             .order_by(d.Code.id)
         )
+
+        if limit:
+            stmt = stmt.limit(limit)
 
         # I use this hack (instead of getting Code objects directly),
         # so it is assured that the objects are read only.

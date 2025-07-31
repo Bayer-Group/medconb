@@ -110,9 +110,13 @@ class CachedCodeRepository:  # pragma: no cover
 
         return res
 
-    def search_codes(self, query_data: d.QueryData, ontology_id: str) -> list[d.Code]:
+    def search_codes(
+        self, query_data: d.QueryData, ontology_id: str, limit: int | None = None
+    ) -> list[d.Code]:
         assert self.session is not None
-        return CodeRepository(self.session).search_codes(query_data, ontology_id)
+        return CodeRepository(self.session).search_codes(
+            query_data, ontology_id, limit=limit
+        )
 
 
 class CachedPropertyRepository:

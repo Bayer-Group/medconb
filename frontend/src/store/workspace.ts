@@ -13,12 +13,8 @@ export type PaneFilter = {
 }
 
 export type SearchResultState = {
-  id: string
-  path: string[]
-  numberOfChildren: number
-  code: string
-  description: string
-  lastDescendantId: number
+  id: number
+  path: number[]
 }
 
 export type PaneState = {

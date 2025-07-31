@@ -164,3 +164,32 @@ class TestSearchCodes:
         for test in tests:
             got = session.code_repository.search_codes(**test["params"])
             assert [c.id for c in got] == test["want"]
+
+    def test_limit(self, session: Session):
+        tests = [
+            {
+                "params": {
+                    "query_data": QueryData(code=None, description="alcohol"),
+                    "ontology_id": "ICD-10-CM",
+                    "limit": 5,
+                },
+                "want": 5,
+            },
+            {
+                "params": {
+                    "query_data": QueryData(
+                        code=CodeSearchParam(
+                            value="", type=d.CodeSearchParamType.ILIKE
+                        ),
+                        description="alcohol",
+                    ),
+                    "ontology_id": "ICD-10-CM",
+                    "limit": 0,
+                },
+                "want": 0,
+            },
+        ]
+
+        for test in tests:
+            got = session.code_repository.search_codes(**test["params"])
+            assert len(got) == test["want"]

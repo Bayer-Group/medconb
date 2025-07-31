@@ -499,6 +499,14 @@ export const SEARCH_CODES = gql`
   }
 `
 
+export const SEARCH_CODES_LINEAR = gql`
+  query searchCodes($ontologyID: ID!, $query: QueryData) {
+    searchCodes(ontologyID: $ontologyID, query: $query) {
+      id
+    }
+  }
+`
+
 export const STORE_TRANSIENT_CHANGES = gql`
   ${CODE_LIST_FIELDS}
   mutation storeTransientChanges($codelistID: ID!, $changes: [ChangesetInput!]!) {

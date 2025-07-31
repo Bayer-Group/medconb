@@ -217,7 +217,7 @@ import {db} from './db'
 
 export const calculateFilteredCodes = (codes: SearchResultState[]): SearchResultState[] => {
   const visibleSearchResult: SearchResultState[] = []
-  const visibleCodes: string[] = []
+  const visibleCodes: number[] = []
   orderBy(codes, (c) => c.path.length, 'asc').forEach((code) => {
     const path = code.path.slice(0, -1)
 

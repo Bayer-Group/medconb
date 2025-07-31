@@ -21,9 +21,9 @@ const filterOntology = (codes: LocalCode[], opts: Opts): TreeNode[] => {
   const valuesV = values(opts.value)
 
   const filteredBySearch = opts.searchResults ? calculateFilteredCodes(opts.searchResults) : null
-  const filteredIds = filteredBySearch ? new Set(filteredBySearch.map((c) => Number(c.id))) : null
+  const filteredIds = filteredBySearch ? new Set(filteredBySearch.map((c) => c.id)) : null
   const filteredIntermediates = filteredBySearch
-    ? new Set(flatten(filteredBySearch.map((c) => c.path.slice(0, -1).map((p) => Number(p)))))
+    ? new Set(flatten(filteredBySearch.map((c) => c.path.slice(0, -1))))
     : null
 
   const selectedCodes = valuesV.reduce((a, c) => a.union(c), new Set())
