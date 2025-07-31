@@ -106,9 +106,9 @@ jobs:
             -path=/migrations/ version 2> /tmp/medconb_db_version
           DB_VERSION=$(cat /tmp/medconb_db_version)
           docker exec -i -u postgres $CONTAINER_ID psql -d test_template -f /tmp/data/${DB_VERSION}_fixtures.sql
-          docker exec -i -u postgres $CONTAINER_ID psql -c "DROP DATABASE IF EXISTS ontologies"
-          docker exec -i -u postgres $CONTAINER_ID psql -c "CREATE DATABASE ontologies"
-          docker exec -i -u postgres $CONTAINER_ID /bin/bash -c 'gunzip -c /tmp/data/ontologies.sql.gz | psql -d ontologies'
+          docker exec -i -u postgres $CONTAINER_ID psql -c "DROP DATABASE IF EXISTS ontologies_test"
+          docker exec -i -u postgres $CONTAINER_ID psql -c "CREATE DATABASE ontologies_test"
+          docker exec -i -u postgres $CONTAINER_ID /bin/bash -c 'gunzip -c /tmp/data/ontologies.sql.gz | psql -d ontologies_test'
       - name: Run pytest 👮🏽‍♀️
         run: make test
 

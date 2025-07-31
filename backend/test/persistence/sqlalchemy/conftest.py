@@ -1,9 +1,8 @@
 import psycopg2
 import pytest
+from medconb.persistence.sqlalchemy import create_sessionmaker
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy import create_engine
-
-from medconb.persistence.sqlalchemy import create_sessionmaker
 
 
 @pytest.fixture
@@ -28,7 +27,7 @@ def sessionmaker():
         echo=False,
     )
     engine_ontology = create_engine(
-        url="postgresql://postgres:password@localhost/ontologies",
+        url="postgresql://postgres:password@localhost/ontologies_test",
         future=True,
         echo=False,
     )

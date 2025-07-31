@@ -3,10 +3,9 @@ import pytest
 
 @pytest.fixture
 def client(sessionmaker):
-    from starlette.testclient import TestClient
-
     from medconb import server
     from medconb.config import config
+    from starlette.testclient import TestClient
 
     config["debug"] = True
     config["assetsDir"] = "backend/assets"
@@ -23,10 +22,9 @@ def client(sessionmaker):
 @pytest.fixture
 def sessionmaker():
     import psycopg2
+    from medconb.persistence.sqlalchemy import create_sessionmaker
     from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
     from sqlalchemy import create_engine
-
-    from medconb.persistence.sqlalchemy import create_sessionmaker
 
     conn = psycopg2.connect("postgresql://postgres:password@localhost/")
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
@@ -41,7 +39,7 @@ def sessionmaker():
         echo=False,
     )
     engine_ontology = create_engine(
-        url="postgresql://postgres:password@localhost/ontologies",
+        url="postgresql://postgres:password@localhost/ontologies_test",
         future=True,
         echo=False,
     )
