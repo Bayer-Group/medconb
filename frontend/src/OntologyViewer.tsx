@@ -50,7 +50,7 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
   const dispatch = useDispatch()
   const client = useApolloClient()
   const [chunks, setChunks] = useState(0)
-  const [codesAreStale, setCodesAreStale] = useState(false)
+  const [codesAreStale, setCodesAreStale] = useState(true)
   const ontologies = useLiveQuery(() => db.ontologies.toArray())
   const codes = useLiveQuery(() => {
     if (!ontologies) return []

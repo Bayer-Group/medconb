@@ -74,6 +74,7 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
   const dispatch = useDispatch()
   const listRef = useRef<VariableSizeList<TreeNode>>(null)
   const [codes, setCodes] = useState<TreeNode[]>([])
+  const [isFiltering, setIsFiltering] = useState(true)
   const [intermediates, setIntermediates] = useState<number[]>([])
   const computedValue = useMemo<CodeTreeDataSet>(() => {
     if (!concepts) {
@@ -127,15 +128,11 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
 
   useEffect(() => {
     if ((ontologyCodes ?? []).length > 0) {
+      setIsFiltering(true)
       filterCodes(true)
     }
-  }, [ontology.name, filters, searchResults, ontologyCodes])
-
-  useEffect(() => {
-    if ((ontologyCodes ?? []).length > 0) {
-      filterCodes(true)
-    }
-  }, [computedValue, openNodes])
+    setIsFiltering(false)
+  }, [ontology.name, filters, searchResults, ontologyCodes, computedValue, openNodes])
 
   const toggleCode = useCallback(
     (code: LocalCode, codelistId: string, checked: boolean, flag: CodeSelectFlag) => {
@@ -201,6 +198,10 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
   const isTruncated = ontology.is_linear && codes.length >= MAX_CODES
   const listHeight = !isTruncated ? height : height - 56
   const noCodesToShow = codes.length === 0
+
+  if (isFiltering) {
+    return <CodeTreeWarning>Ontology is loading.</CodeTreeWarning>
+  }
 
   if (noCodesToShow) {
     return <CodeTreeWarning>No codes to display. Please adjust your filters or search criteria.</CodeTreeWarning>
