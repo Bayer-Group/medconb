@@ -1,5 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit'
-import {difference, union, xor, unionBy, omit} from 'lodash'
+import {difference, union, xor, unionBy, pick} from 'lodash'
 import {Code, Codelist, ContainerSpec, IndicatorIndex, Ontology} from '../..'
 import {nanoid} from 'nanoid'
 import {Filter} from '../FilterComponent'
@@ -157,10 +157,10 @@ const workspaceStore = createSlice({
 
       if (state.openCodelists.length === 0) {
         state.isComparisionMode = false
-        //clear all filters
+        //clear codelist related filters and visible concepts list
         state.panes = state.panes.map((p) => ({
           ...p,
-          ...omit(PANE_DEFAULTS, ['filter']),
+          ...pick(PANE_DEFAULTS, ['filters', 'visibleConcepts']),
         }))
       }
     },
