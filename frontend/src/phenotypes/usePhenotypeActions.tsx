@@ -148,6 +148,9 @@ const usePhenotypeActions = (phenotype: Phenotype, isReadOnly: boolean, options?
         case 'delete':
           handleDelete()
           break
+        case 'copy_id':
+          navigator.clipboard.writeText(phenotype.id)
+          break
         // case 'export':
         //   handleExport()
         //   break
@@ -171,6 +174,7 @@ const usePhenotypeActions = (phenotype: Phenotype, isReadOnly: boolean, options?
       items.push({type: 'divider'})
     }
 
+    items.push({label: 'Copy ID', key: 'copy_id'})
     items.push({label: 'Export Phenotype', key: 'export', disabled: true})
 
     return items

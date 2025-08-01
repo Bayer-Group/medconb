@@ -75,6 +75,7 @@ const useCollectionActions = (collection: Collection, isReadOnly: boolean, optio
       items.push({label: 'Import', key: 'import', disabled: collection.itemType !== 'Codelist'})
     }
 
+    items.push({label: 'Copy all IDs', key: 'copy_id'})
     items.push({label: 'Export Collection', key: 'export', disabled: collection.itemType !== 'Codelist'})
 
     return items
@@ -138,6 +139,15 @@ const useCollectionActions = (collection: Collection, isReadOnly: boolean, optio
     })
   }, [activeCollections, collection])
 
+  const createItemIdCsv = () => {
+    const header = 'id,name'
+    const rows = collection.items.map((item) => {
+      const escape = (str: string) => (str.includes('"') ? `"${String(str).replace(/"/g, '""')}"` : str)
+      return `${item.id},${escape(item.name)}`
+    })
+    return [header, ...rows].join('\n')
+  }
+
   const handleMenuClick = useCallback(
     (info: MenuInfo) => {
       switch (info.key) {
@@ -149,6 +159,9 @@ const useCollectionActions = (collection: Collection, isReadOnly: boolean, optio
           return
         case 'export':
           handleExport()
+          return
+        case 'copy_id':
+          navigator.clipboard.writeText(createItemIdCsv())
           return
         case 'duplicate':
           // onDuplicate()

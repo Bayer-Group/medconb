@@ -158,6 +158,7 @@ const useCodelistActions = (codelist: Codelist, isReadOnly: boolean, options?: {
       items.push({type: 'divider'})
     }
 
+    items.push({label: 'Copy ID', key: 'copy_id'})
     items.push({label: 'Export Codelist', key: 'export'})
 
     if (allowComparision) {
@@ -273,6 +274,9 @@ const useCodelistActions = (codelist: Codelist, isReadOnly: boolean, options?: {
           break
         case 'delete':
           handleDelete()
+          break
+        case 'copy_id':
+          navigator.clipboard.writeText(codelist.id)
           break
         case 'export':
           handleExport()
