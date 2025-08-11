@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout Repository 🛎️
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Extract requirements.txt 📦
         uses: mikefarah/yq@master
         with:
@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout Repository 🛎️
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Extract requirements.txt 📦
         uses: mikefarah/yq@master
         with:
