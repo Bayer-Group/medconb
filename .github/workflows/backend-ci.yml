@@ -23,7 +23,7 @@ jobs:
       - name: Checkout Repository 🛎️
         uses: actions/checkout@v4
       - name: Install Python 3.10 🐍
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Set up runner 📦
@@ -39,7 +39,7 @@ jobs:
       - name: Checkout Repository 🛎️
         uses: actions/checkout@v4
       - name: Install Python 3.10 🐍
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Extract requirements.txt 📦
@@ -79,7 +79,7 @@ jobs:
           chmod +x $HOME/.docker/cli-plugins/docker-compose
           docker compose -f docker-compose.ci.yml up -d
       - name: Install Python 3.10 🐍
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Extract requirements.txt 📦
