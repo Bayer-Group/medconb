@@ -112,6 +112,8 @@ class AuthBackend(AuthenticationBackend):
             assert authenticator.credentials is not None
             assert authenticator.user is not None
 
+            authenticator.user.set_authenticated(True)
+
             authenticator.user.last_contact = datetime.now()
             session.commit()
 
@@ -164,7 +166,6 @@ class DevAuthenticator:
             if not user:  # pragma: no cover - happens when user was deleted after init
                 self._error = AuthenticationError("Dev user does not exist anymore")
                 return
-            user.set_authenticated(True)
             self._credentials = AuthCredentials(["authenticated"])
             self._user = user
         else:
@@ -197,7 +198,6 @@ class PasswordAuthenticator:
             self._error = AuthenticationError("User is not available anymore")
             return
 
-        user.set_authenticated(True)
         self._credentials = AuthCredentials(["authenticated"])
         self._user = user
 
