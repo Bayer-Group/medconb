@@ -12,7 +12,7 @@ const UserDisplay: React.FC<{userId: string}> = ({userId}) => {
 
   if (!data) return <Skeleton />
 
-  return <>{data.users[0].name}</>
+  return <>{data.users[0].name ? data.users[0].name : <i>Deleted User</i>}</>
 }
 
 export default UserDisplay
