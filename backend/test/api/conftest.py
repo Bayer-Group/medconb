@@ -3,9 +3,10 @@ import pytest
 
 @pytest.fixture
 def client(sessionmaker):
+    from starlette.testclient import TestClient
+
     from medconb import server
     from medconb.config import config
-    from starlette.testclient import TestClient
 
     config["debug"] = True
     config["assetsDir"] = "backend/assets"
@@ -13,8 +14,8 @@ def client(sessionmaker):
     config["auth"]["develop"]["token"] = "FOOBAR"
     config["auth"]["develop"]["user_id"] = "00000000-0000-0000-0001-000000000001"
 
-    sm, on_startup = sessionmaker
-    app = server.create_app(sm, config, on_startup=on_startup)
+    sm, _ = sessionmaker
+    app = server.create_app(sm, config, lifespan=None)
 
     return TestClient(app)
 
@@ -22,9 +23,10 @@ def client(sessionmaker):
 @pytest.fixture
 def sessionmaker():
     import psycopg2
-    from medconb.persistence.sqlalchemy import create_sessionmaker
     from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
     from sqlalchemy import create_engine
+
+    from medconb.persistence.sqlalchemy import create_sessionmaker
 
     conn = psycopg2.connect("postgresql://postgres:password@localhost/")
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)

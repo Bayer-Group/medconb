@@ -1,13 +1,14 @@
 import psycopg2
 import pytest
-from medconb.persistence.sqlalchemy import create_sessionmaker
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy import create_engine
+
+from medconb.persistence.sqlalchemy import create_sessionmaker
 
 
 @pytest.fixture
 def session(sessionmaker):
-    sm, on_startup = sessionmaker
+    sm, _ = sessionmaker
     with sm() as session:
         yield session
 

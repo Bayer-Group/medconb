@@ -174,7 +174,7 @@ class Session(SQLSession):
 
 def create_sessionmaker(
     engine_medconb, engine_ontology, cache_client=None
-) -> tuple[sessionmaker, list[Callable]]:
+) -> tuple[sessionmaker, Callable | None]:
     medconb_mappers = orm.start_mappers()
     ontology_mappers = ontology_orm.start_mappers()
 
@@ -182,7 +182,7 @@ def create_sessionmaker(
         mp: engine_ontology for mp in ontology_mappers
     }
 
-    startup_hooks: list[Callable] = []
+    cache_warmup = None
 
     init_sm = sql_sessionmaker(bind=engine_medconb, binds=binds)
     property_repo = CachedPropertyRepository(sm=init_sm)
@@ -190,7 +190,7 @@ def create_sessionmaker(
 
     if cache_client:
         code_repo = CachedCodeRepository(sm=init_sm, client=cache_client)
-        startup_hooks.append(code_repo.warmup)  # type: ignore
+        cache_warmup = code_repo.warmup  # type: ignore
         # https://github.com/python/mypy/issues/17198
         # can't upgrade mypy above 1.10.1, because of sqlalchemy (waiting for v2.1)
 
@@ -202,4 +202,4 @@ def create_sessionmaker(
         property_repository=property_repo,
     )
 
-    return sm, startup_hooks
+    return sm, cache_warmup

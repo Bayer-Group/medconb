@@ -30,6 +30,7 @@ class CachedCodeRepository:  # pragma: no cover
         """
         self._client = client
         self._sm = sm
+        self._is_hot = False
         with sm() as session:
             session = cast(Session, session) if TYPE_CHECKING else session
             self._ontologies = session.scalars(select(t_o.ontology.c.id)).all()
@@ -43,19 +44,21 @@ class CachedCodeRepository:  # pragma: no cover
         self.session = session
         return self
 
-    async def warmup(self) -> None:
+    def warmup(self) -> None:
         while True:
             try:
                 with open("/tmp/medconb.lock.warmup", "x"):
                     # # to not constantly warming up the cache in development
                     # self._client.set("is_hot", 1, ex=1)
                     if self._client.get("is_hot"):
+                        self._is_hot = True
                         print(f"[{os.getpid()}] Cache already warmed up")
                     else:
                         print(f"[{os.getpid()}] Warming up cache")
                         with self._sm() as session:
                             self._warmup_cache(session)
                         self._client.set("is_hot", 1, ex=5 * 60)
+                        self._is_hot = True
                 os.remove("/tmp/medconb.lock.warmup")
                 break
             except FileExistsError:
@@ -90,16 +93,28 @@ class CachedCodeRepository:  # pragma: no cover
         print("Cached", counter, "codes")
 
     def get(self, code_id: int) -> Optional[d.Code]:
+        if not self._is_hot:
+            assert self.session is not None
+            return CodeRepository(self.session).get(code_id)
+
         data = self._client.get(f"c|{code_id}")
         return d.Code.deserialize(data) if data else None
 
     def get_all(self, code_ids: list[int]) -> list[d.Code]:
+        if not self._is_hot:
+            assert self.session is not None
+            return CodeRepository(self.session).get_all(code_ids)
+
         data = self._client.mget([f"c|{id_}" for id_ in code_ids])
         return list(map(d.Code.deserialize, filter(None, data)))
 
     def find_codes(
         self, codes: list[str], ontology_id: str | None = None
     ) -> dict[str, int | None]:
+        if not self._is_hot:
+            assert self.session is not None
+            return CodeRepository(self.session).find_codes(codes, ontology_id)
+
         res = {}
         for o in self._ontologies:
             if ontology_id and o != ontology_id:

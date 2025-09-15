@@ -1,3 +1,5 @@
+import contextlib
+import threading
 from typing import TYPE_CHECKING, Callable
 
 import confuse  # type: ignore
@@ -19,13 +21,14 @@ if TYPE_CHECKING:  # pragma: no cover
 
 def create_app() -> "ASGIApp":  # pragma: no cover
     setup_logging(config)
-    sm, startup_hooks = _create_sessionmaker(config)
-    return server.create_app(sm, config, on_startup=startup_hooks)
+    sm, cache_warmup = _create_sessionmaker(config)
+    lifespan = _create_lifespan(cache_warmup) if cache_warmup else None
+    return server.create_app(sm, config, lifespan=lifespan)
 
 
 def _create_sessionmaker(
     config,
-) -> tuple["sessionmaker", list[Callable]]:  # pragma: no cover
+) -> tuple["sessionmaker", Callable | None]:  # pragma: no cover
     db_type = config["database"]["type"].get()
 
     if db_type == "sqlalchemy":
@@ -41,7 +44,7 @@ def _create_sessionmaker(
 
 def _create_sqlalchemy_sessionmaker(
     db_config, cache_client
-) -> tuple["sessionmaker", list[Callable]]:  # pragma: no cover
+) -> tuple["sessionmaker", Callable | None]:  # pragma: no cover
     engine_medconb = create_engine(
         url=db_config["medconb"]["url"].get(str),
         future=True,
@@ -63,3 +66,14 @@ def _create_cache_client(cache_config) -> redis.Redis | None:  # pragma: no cove
     if cache_config["enabled"].get(bool):
         return redis.StrictRedis(host=cache_config["host"].get(str), port=6379, db=0)
     return None
+
+
+def _create_lifespan(cache_warmup: Callable):
+    @contextlib.asynccontextmanager
+    async def _lifespan(app):
+        warmup_thread = threading.Thread(target=cache_warmup)
+        warmup_thread.start()
+        yield
+        warmup_thread.join()
+
+    return _lifespan

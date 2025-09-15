@@ -134,10 +134,7 @@ def sessionmaker():
         url=f"{conn_str}ontologies", future=True, echo=False
     )
 
-    sm, startup_hooks = create_sessionmaker(engine_medconb, engine_ontology)
-
-    for startup_hook in startup_hooks:
-        startup_hook()
+    sm, _ = create_sessionmaker(engine_medconb, engine_ontology)
 
     yield sm
 

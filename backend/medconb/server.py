@@ -1,5 +1,5 @@
 import os
-from typing import Any, Callable, Optional, Sequence
+from typing import Any, Callable, Optional
 
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLHTTPHandler, GraphQLWSHandler
@@ -149,9 +149,7 @@ def create_CORSMiddleware(config) -> Middleware:
     return Middleware(CORSMiddleware, **options)
 
 
-def create_app(
-    sessionmaker: sessionmaker, config, on_startup=Sequence[Callable]
-) -> ASGIApp:
+def create_app(sessionmaker: sessionmaker, config, lifespan) -> ASGIApp:
     debug_ = config["debug"].get(False)
     assets_directory = config["assetsDir"].get("assets")
 
@@ -169,7 +167,7 @@ def create_app(
                 plugins=(plugins.RequestIdPlugin(), plugins.CorrelationIdPlugin()),
             ),
         ],
-        on_startup=on_startup,
+        lifespan=lifespan,
         exception_handlers={
             HTTPException: http_exception,
             # errors.MissingClaimError: http_exception,
