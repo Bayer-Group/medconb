@@ -136,7 +136,8 @@ ontology_map: dict[str, list[str]] = {
     "ATC": ["ATC"],
     "CPT": ["CPT"],
     "HCPCS": ["HCPCS"],
-    "SNOMEDCT_US": ["SNOMEDCT_US"],
+    "NDC": ["NDC"],
+    "SNOMEDCT_US": ["SNOMED"],
 }
 
 
@@ -560,49 +561,57 @@ def _main(session: Session):  # noqa R901 - too complex
         new_codes_sq.c.ontology_id_old,
         new_codes_sq.c.ontology_id,
         new_codes_sq.c.children_ids,
-    ).union_all(
-        # ontology root nodes
-        select(
-            literal(None).label("id_old"),
-            -1 * func.row_number().over(order_by=ontology_new_tbl.c.id).label("id"),
-            literal(None).label("ontology_id_old"),
-            ontology_new_tbl.c.id.label("ontology_id"),
-            case(
-                (
-                    ontology_new_tbl.c.is_linear,
-                    select(
-                        array_agg(
-                            aggregate_order_by(
-                                code_new_tbl.c.id, code_new_tbl.c.id.asc()
-                            )
-                        )
-                    ).where(code_new_tbl.c.ontology_id == ontology_new_tbl.c.id),
-                ),
-                else_=ontology_new_tbl.c.root_code_ids,
-            ).label("children_ids"),
-        ),
-        # overall root node with ontology root nodes as children
-        select(
-            literal(None).label("id_old"),
-            literal(0).label("id"),
-            literal(None).label("ontology_id_old"),
-            literal(None).label("ontology_id"),
-            array_agg(
+    )
+
+    # ontology root nodes
+    # separate (not union) because of some postgres bug
+    adj_stmt_2 = select(
+        literal(None).label("id_old"),
+        (-1 * func.row_number().over(order_by=ontology_new_tbl.c.id)).label("id"),
+        literal(None).label("ontology_id_old"),
+        ontology_new_tbl.c.id.label("ontology_id"),
+        case(
+            (
+                ontology_new_tbl.c.is_linear,
                 select(
-                    (-1 * func.row_number().over(order_by=ontology_new_tbl.c.id)).label(
-                        "id"
+                    array_agg(
+                        aggregate_order_by(code_new_tbl.c.id, code_new_tbl.c.id.asc())
                     )
                 )
-                .subquery()
-                .c.id
-            ).label("children_ids"),
-        ),
+                .where(code_new_tbl.c.ontology_id == ontology_new_tbl.c.id)
+                .scalar_subquery(),
+            ),
+            else_=ontology_new_tbl.c.root_code_ids,
+        ).label("children_ids"),
+    )
+
+    # overall root node with ontology root nodes as children
+    adj_stmt_3 = select(
+        literal(None).label("id_old"),
+        literal(0).label("id"),
+        literal(None).label("ontology_id_old"),
+        literal(None).label("ontology_id"),
+        array_agg(
+            select(
+                (-1 * func.row_number().over(order_by=ontology_new_tbl.c.id)).label(
+                    "id"
+                )
+            )
+            .subquery()
+            .c.id
+        ).label("children_ids"),
     )
 
     logger.info("Get adjacency matrix ...")
 
     res_adj = exec(session, adj_stmt).fetchall()
     adj_matrix = {r[1]: r for r in res_adj}
+
+    res_adj = exec(session, adj_stmt_2).fetchall()
+    adj_matrix.update({r[1]: r for r in res_adj})
+
+    res_adj = exec(session, adj_stmt_3).fetchall()
+    adj_matrix.update({r[1]: r for r in res_adj})
 
     logger.info("number of nodes: %d", len(adj_matrix))
     id_map = {}
