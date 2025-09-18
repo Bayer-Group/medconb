@@ -774,7 +774,7 @@ def remove_invalid_codes(session: SQLSession):
         if not ids:
             continue
 
-        print(
+        logger.warning(
             f"Remove {len(ids)} invalid codes "
             f"from ontology {ontology_id} from codelists"
         )
@@ -833,7 +833,7 @@ def assert_referenced_codes_exist_in_new_table(session: SQLSession):
                 (d.Code.ontology_id == ontology_id) & d.Code.id.in_(id_chunk)
             )
             codes.update(session.scalars(codes_stmt).fetchall())
-        print(
+        logger.info(
             f"Used {len(codes)} codes from ontology {ontology_id}"
             # ":\n", codes
         )
@@ -857,7 +857,7 @@ def assert_referenced_codes_exist_in_new_table(session: SQLSession):
                 f" {missing}"
             )
 
-        print(" -> All codes are present in the new code table")
+        logger.info(" -> All codes are present in the new code table")
 
 
 def assert_all_old_codes_exist_in_new_table(session: SQLSession):
@@ -871,14 +871,14 @@ def assert_all_old_codes_exist_in_new_table(session: SQLSession):
     in that: distinguish between ontologies
     """
     ontology_ids = session.scalars(select(d.Code.ontology_id).distinct()).fetchall()
-    print("Ontologies:", ontology_ids)
+    logger.info("Ontologies: %s", ontology_ids)
 
     for ontology_id in ontology_ids:
         codes_stmt = select(func.upper(d.Code.code)).where(
             (d.Code.ontology_id == ontology_id)
         )
         codes = set(session.scalars(codes_stmt).fetchall())
-        print(
+        logger.info(
             f"Found {len(codes)} codes from ontology {ontology_id}"
             # ":\n", codes
         )
@@ -900,7 +900,7 @@ def assert_all_old_codes_exist_in_new_table(session: SQLSession):
                 f"{len(missing)} codes are missing in the new code table: {missing}"
             )
 
-        print(" -> All codes are present in the new code table")
+        logger.info(" -> All codes are present in the new code table")
 
 
 def dfs(adj_matrix, id_map, path, node) -> int:
