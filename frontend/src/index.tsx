@@ -53,10 +53,16 @@ const initApp = async (renderApp: (app: JSX.Element) => void) => {
   const sessionId = setupMonitoring(config.glitchtipDSN)
 
   renderApp(<LoadingScreen>Checking for updates</LoadingScreen>)
-  if (await versionCheck()) {
+
+  const updateLoadingScreen = (msg: string) => {
+    renderApp(<LoadingScreen>{msg}</LoadingScreen>)
+  }
+
+  if (await versionCheck(updateLoadingScreen)) {
     console.log('Version upgrade done.')
   }
 
+  renderApp(<LoadingScreen>Starting application</LoadingScreen>)
   return (
     <AuthProvider>
       <AppProvider sessionId={sessionId} />

@@ -1,6 +1,7 @@
 import {inferSchema, initParser, Parser, Schema} from 'udsv'
 import {LocalCode, LocalOntology} from '..'
 import {db} from './db'
+import {DBSyncProgress} from './syncTypes'
 
 type ManifestEntry = {
   num_codes: number
@@ -14,7 +15,7 @@ type Manifest = {
 type syncDBOptions = {
   baseUrl: string
   tokenLookup: () => Promise<string>
-  onProgress?: (progress: number) => void
+  onProgress: (progress: DBSyncProgress) => void
 }
 const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
   const token = await tokenLookup()
@@ -33,12 +34,27 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
   const allCountsCorrect = countChecks.every(Boolean)
   if (allCountsCorrect) return
 
-  onProgress?.(0)
-  let progress = 0
-
   // if there is any mismatch, clear and load everything again.
   await db.codes.clear()
   await db.ontologies.clear()
+
+  // Initialize progress tracking for each ontology
+  const progressMap = new Map<string, [number, number, number]>()
+  manifest.files.forEach((entry) => {
+    progressMap.set(entry.ontology_id, [0, 0, entry.num_codes])
+  })
+
+  const emitProgress = () => {
+    const progressArray: DBSyncProgress = manifest.files.map((entry) => ({
+      name: entry.ontology_id,
+      countTotal: progressMap.get(entry.ontology_id)![2],
+      countLoaded: progressMap.get(entry.ontology_id)![1],
+      percent: progressMap.get(entry.ontology_id)![0],
+    }))
+    onProgress(progressArray)
+  }
+
+  emitProgress() // Initial state
 
   const totalCount = manifest.files.reduce((i, e) => i + e.num_codes, 0)
 
@@ -76,8 +92,12 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
         ontology.root_code_ids.push(...x.filter((c) => c.path.length === 1).map((c) => c.id))
       }
       cx += x.length
-      progress += x.length
-      onProgress?.(Math.round((progress / totalCount) * 100))
+
+      // Update progress for this specific ontology
+      const percent = Math.min(100, Math.round((cx / entry.num_codes) * 100))
+      progressMap.set(entry.ontology_id, [percent, cx, entry.num_codes])
+      emitProgress()
+
       await db.codes.bulkPut(x)
     }
 
@@ -91,7 +111,11 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
   const allSyncCorrect = syncResults.every(Boolean)
   if (!allSyncCorrect) throw new DBSyncError('SYNC_DB_MISMATCH')
 
-  onProgress?.(100)
+  // Final progress update - all ontologies at 100%
+  manifest.files.forEach((entry) => {
+    progressMap.set(entry.ontology_id, 100)
+  })
+  emitProgress()
 }
 
 export default syncDB

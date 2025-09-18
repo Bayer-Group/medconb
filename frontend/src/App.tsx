@@ -23,6 +23,7 @@ import syncDB, {DBSyncError} from './syncDB'
 import useReset from './useReset'
 import {AuthContext} from './AuthProvider'
 import {getConfig} from './config'
+import {DBSyncProgress} from './syncTypes'
 
 const {Paragraph} = Typography
 
@@ -111,7 +112,7 @@ const App: React.FC<AppProps> = () => {
   const {onError} = useContext(ErrorHandlerContext)
   const client = useApolloClient()
   const [loading, setLoading] = useState(true)
-  const [dbSyncProgress, setDbSyncProgress] = useState<number>()
+  const [dbSyncProgress, setDbSyncProgress] = useState<DBSyncProgress>()
   const [appUserData, setAppUserData] = useState<MedConbUserContextValue>({} as MedConbUserContextValue)
   const changeSet = useSelector((state: RootState) => state.changes.changeSet)
   const [dbSyncError, setDbSyncError] = useState<string>()
@@ -206,8 +207,29 @@ const App: React.FC<AppProps> = () => {
               <br />
               Please wait while we load the latest data...
             </div>
-            <div style={{width: 200, margin: '0 auto'}}>
-              <Progress percent={dbSyncProgress} />
+            <div style={{width: 300, margin: '10px auto'}}>
+              {/* Overall progress */}
+              <div style={{marginBottom: 16}}>
+                <div style={{fontSize: 12, marginBottom: 4, fontWeight: 500}}>Overall Progress</div>
+                <Progress
+                  percent={Math.round(
+                    (dbSyncProgress.reduce((sum, o) => sum + o.countLoaded, 0) /
+                      dbSyncProgress.reduce((sum, o) => sum + o.countTotal, 0)) *
+                      100,
+                  )}
+                  strokeColor="#00BCFF"
+                />
+              </div>
+
+              {/* Individual ontology progress */}
+              {dbSyncProgress.map((ontology) => (
+                <div key={ontology.name} style={{marginBottom: 5}}>
+                  <div style={{fontSize: 11, marginBottom: '-0.5em', color: '#666'}}>
+                    {ontology.name} ({ontology.countLoaded} / {ontology.countTotal})
+                  </div>
+                  <Progress percent={ontology.percent} size="small" showInfo={false} strokeColor="#52c41a" />
+                </div>
+              ))}
             </div>
           </>
         )}
