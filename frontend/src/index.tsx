@@ -13,9 +13,13 @@ import {cacheSizes} from '@apollo/client/utilities'
 import {ResultStatusType} from 'antd/lib/result'
 import MainLoader from './components/MainLoader'
 import Witties from './components/Witties'
+import {createTimer} from './utils/timer'
 
 cacheSizes['inMemoryCache.executeSelectionSet'] = 1_000_000
 cacheSizes['inMemoryCache.executeSubSelectedArray'] = 500_000
+
+// Startup observability
+const startupTimer = createTimer('Startup')
 
 const errorBanner = (text: string, status: ResultStatusType | undefined = 'error') => (
   <Result status={status} title={text} style={{margin: '0 auto', width: '60%'}} />
@@ -35,8 +39,11 @@ const LoadingScreen: React.FC<React.PropsWithChildren> = ({children}) => (
 )
 
 const initApp = async (renderApp: (app: JSX.Element) => void) => {
+  startupTimer.logStep('Initialization started')
+
   renderApp(<LoadingScreen>Loading Configuration</LoadingScreen>)
   const configTry = tryGetConfig()
+  startupTimer.logStep('Configuration loaded')
 
   if (!configTry.success) {
     console.error('Failed to load config:', configTry.error)
@@ -46,11 +53,13 @@ const initApp = async (renderApp: (app: JSX.Element) => void) => {
   const config: ApplicationConfig = configTry.config
 
   if (config.maintenance_mode) {
+    startupTimer.logStep('Maintenance mode detected')
     return MaintenanceModeBanner
   }
 
   renderApp(<LoadingScreen>Initializing Error Handling</LoadingScreen>)
   const sessionId = setupMonitoring(config.glitchtipDSN)
+  startupTimer.logStep('Error monitoring initialized')
 
   renderApp(<LoadingScreen>Checking for updates</LoadingScreen>)
 
@@ -61,8 +70,11 @@ const initApp = async (renderApp: (app: JSX.Element) => void) => {
   if (await versionCheck(updateLoadingScreen)) {
     console.log('Version upgrade done.')
   }
+  startupTimer.logStep('Version check completed')
 
   renderApp(<LoadingScreen>Starting application</LoadingScreen>)
+  startupTimer.logStep('Application components initialized')
+
   return (
     <AuthProvider>
       <AppProvider sessionId={sessionId} />
@@ -72,7 +84,13 @@ const initApp = async (renderApp: (app: JSX.Element) => void) => {
 
 const setupMonitoring = (glitchtipDSN: string) => {
   const sessionId = uuidv4()
-  Sentry.init({dsn: glitchtipDSN, initialScope: {sessionId}})
+  Sentry.init({
+    dsn: glitchtipDSN,
+    beforeSend: (event) => {
+      event.tags = {...event.tags, sessionId}
+      return event
+    },
+  })
   Sentry.setTag('sessionId', sessionId)
   return sessionId
 }
@@ -86,8 +104,13 @@ const renderApp = (app: JSX.Element) => {
 }
 
 initApp(renderApp)
-  .then(renderApp)
+  .then((app) => {
+    startupTimer.logStep('App render started')
+    renderApp(app)
+    startupTimer.logTotal()
+  })
   .catch((error) => {
     console.log(error)
     renderApp(InitErrorBanner)
+    startupTimer.logStep('Startup failed with error')
   })
