@@ -1,6 +1,6 @@
 import {Spin, notification} from 'antd'
 import * as Sentry from '@sentry/react'
-import {createContext, useCallback, useContext, useEffect, useState} from 'react'
+import {createContext, useCallback, useContext, useEffect, useMemo, useState} from 'react'
 import {getConfig} from './config'
 import {ErrorResponse, onError} from '@apollo/client/link/error'
 import {
@@ -28,6 +28,7 @@ import {PersistGate} from 'redux-persist/integration/react'
 import App from './App'
 import store from './store'
 import {Persistor, persistStore} from 'redux-persist'
+import {getTimer} from './utils/timer'
 
 export type AppContextType = {
   apolloCachePersistor: CachePersistor<NormalizedCacheObject>
@@ -37,6 +38,8 @@ export type AppContextType = {
 export const AppContext = createContext({} as AppContextType)
 
 export const AppProvider: React.FC<{sessionId: string}> = ({sessionId}) => {
+  const appProviderTimer = useMemo(() => getTimer('AppProvider'), [])
+
   const [apolloClient, setApolloClient] = useState<ApolloClient<NormalizedCacheObject>>()
   const [apolloCachePersistor, setApolloCachePersistor] = useState<CachePersistor<NormalizedCacheObject>>()
 
@@ -76,19 +79,27 @@ export const AppProvider: React.FC<{sessionId: string}> = ({sessionId}) => {
     }
   }
 
-  const apolloCache = createApolloCache()
-  const newPersistor = createApolloCachePersistor(apolloCache)
-  const apolloLinks = createApolloLinks(errorHandler, [...config.graphql_endpoints], getTokenAsync)
-
   useEffect(() => {
     async function initApollo() {
+      appProviderTimer.logStep('Start initialization of Apollo cache')
+
+      const apolloCache = createApolloCache()
+      const newPersistor = createApolloCachePersistor(apolloCache)
+      const apolloLinks = createApolloLinks(errorHandler, [...config.graphql_endpoints], getTokenAsync)
+      appProviderTimer.logStep('Apollo cache objects created')
+
       await newPersistor.restore()
+      appProviderTimer.logStep('Apollo cache restored from storage')
+
       setApolloCachePersistor(newPersistor)
+      appProviderTimer.logStep('Apollo cache persitor assigned')
+
       const _client = new ApolloClient({
         connectToDevTools: true,
         link: from(apolloLinks),
         cache: apolloCache,
       })
+      appProviderTimer.logStep('Apollo client created')
 
       setApolloClient(_client)
     }
@@ -113,6 +124,7 @@ export const AppProvider: React.FC<{sessionId: string}> = ({sessionId}) => {
 
   const reduxPersistor = persistStore(store)
 
+  getTimer('AppLoad').logStep('apollo client & redux store initialized')
   return (
     <_ApolloProvider client={apolloClient}>
       <ErrorHandlerContext.Provider value={{onError: uiErrorHandler, sessionId}}>

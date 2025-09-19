@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useState} from 'react'
+import React, {createContext, useContext, useEffect, useMemo, useState} from 'react'
 import {App as AntdApp, Button, ConfigProvider, Flex, Progress, Result, Space, Spin, Typography} from 'antd'
 import enUSLocale from 'antd/lib/locale/en_US'
 import useStorePersist from './useStorePersist'
@@ -24,6 +24,7 @@ import useReset from './useReset'
 import {AuthContext} from './AuthProvider'
 import {getConfig} from './config'
 import {DBSyncProgress} from './syncTypes'
+import {getTimer} from './utils/timer'
 
 const {Paragraph} = Typography
 
@@ -109,6 +110,9 @@ const router = createHashRouter([
 ])
 
 const App: React.FC<AppProps> = () => {
+  const appTimer = useMemo(() => getTimer('App'), [])
+  useEffect(() => getTimer('AppLoad').logStep('Start loading App'), [])
+
   const {onError} = useContext(ErrorHandlerContext)
   const client = useApolloClient()
   const [loading, setLoading] = useState(true)
@@ -127,6 +131,7 @@ const App: React.FC<AppProps> = () => {
   useEffect(() => {
     void (async () => {
       const res = await client.query({query: SELF, fetchPolicy: 'network-only'})
+      appTimer.logStep('User data fetched')
 
       try {
         await syncDB({
@@ -134,6 +139,7 @@ const App: React.FC<AppProps> = () => {
           tokenLookup: async () => await getTokenAsync(),
           onProgress: (progress) => setDbSyncProgress(progress),
         })
+        appTimer.logStep('Ontology DB synced')
       } catch (e: any) {
         console.log(e)
         if (e instanceof DBSyncError) {
@@ -171,6 +177,7 @@ const App: React.FC<AppProps> = () => {
   }, [changeSet, syncing])
 
   useStorePersist(5000)
+
   if (dbSyncError) {
     return (
       <MainLoader>
@@ -242,6 +249,7 @@ const App: React.FC<AppProps> = () => {
     )
   }
 
+  getTimer('AppLoad').logTotal()
   return (
     <Sentry.ErrorBoundary
       fallback={(props) => React.createElement(ErrorFallback, props)}

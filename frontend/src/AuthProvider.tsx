@@ -12,7 +12,7 @@ import {
 import jwt_decode from 'jwt-decode'
 import localforage from 'localforage'
 import {get} from 'lodash'
-import {createTimer} from './utils/timer'
+import {createTimer, getTimer} from './utils/timer'
 
 type AuthContextValue = {getTokenAsync: () => Promise<string>; username: string}
 export const AuthContext = createContext<AuthContextValue>({} as AuthContextValue)
@@ -167,6 +167,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   if (!msalInstance) throw new Error('MSAL auth is enabled but config is not given')
 
   authProviderTimer.logTotal()
+  getTimer('AppLoad').logStep('AuthProvider mounted')
   return (
     <AuthContext.Provider value={{getTokenAsync, username}}>
       <MsalProvider instance={msalInstance}>{children}</MsalProvider>

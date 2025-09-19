@@ -2,7 +2,7 @@ import localforage from 'localforage'
 
 import {getConfig} from './config'
 import {db} from './db'
-import {createTimer} from './utils/timer'
+import {getTimer} from './utils/timer'
 
 type StoredVersion = {
   b: string
@@ -10,7 +10,7 @@ type StoredVersion = {
 }
 
 export const versionCheck = async (updateLoadingScreen: (msg: string) => void) => {
-  const versionTimer = createTimer('VersionCheck')
+  const versionTimer = getTimer('Init').createSubTimer('VersionCheck')
   versionTimer.logStep('Starting version check')
 
   let upgraded = false
@@ -23,14 +23,14 @@ export const versionCheck = async (updateLoadingScreen: (msg: string) => void) =
   // Run backend request and local storage retrieval in parallel
   const [statusResponse, currVersions] = await Promise.all([
     (async () => {
-      const backendTimer = createTimer('VersionCheck.BackendRequest')
+      const backendTimer = versionTimer.createSubTimer('BackendRequest')
       const response = await fetch((getConfig().graphql_endpoints[0] as string).replace('/graphql/', ''))
       const result = await response.json()
       backendTimer.logStep('Backend version request completed')
       return result
     })(),
     (async () => {
-      const storageTimer = createTimer('VersionCheck.LocalStorageRetrieval')
+      const storageTimer = versionTimer.createSubTimer('LocalStorageRetrieval')
       const result: StoredVersion = (await localforage.getItem('__v')) || {b: '', f: ''}
       storageTimer.logStep('Local storage retrieval completed')
       return result
@@ -78,7 +78,7 @@ export const versionCheck = async (updateLoadingScreen: (msg: string) => void) =
     // currently not implemened in backend
   }
 
-  versionTimer.logStep('Version check completed')
+  versionTimer.logTotal()
   return upgraded
 }
 
