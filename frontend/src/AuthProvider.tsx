@@ -1,4 +1,4 @@
-import {createContext, PropsWithChildren, useEffect, useState} from 'react'
+import {createContext, PropsWithChildren, useEffect, useMemo, useState} from 'react'
 
 import {ApplicationConfig, getConfig} from './config'
 import LoginScreen from './LoginScreen'
@@ -12,6 +12,7 @@ import {
 import jwt_decode from 'jwt-decode'
 import localforage from 'localforage'
 import {get} from 'lodash'
+import {createTimer} from './utils/timer'
 
 type AuthContextValue = {getTokenAsync: () => Promise<string>; username: string}
 export const AuthContext = createContext<AuthContextValue>({} as AuthContextValue)
@@ -23,13 +24,20 @@ export type AuthData = {
 export type AuthProviderProps = PropsWithChildren<{}>
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
+  const authProviderTimer = useMemo(() => createTimer('AuthProvider Setup'), [])
+  useEffect(() => authProviderTimer.logStep('AuthProvider created'), [])
+
   const [token, setToken] = useState('')
   const [loginType, setLoginType] = useState('')
   const [passwordLoginFailed, setPasswordLoginFailed] = useState(false)
   const [registrationErrorMsg, setRegistrationErrorMsg] = useState('')
 
   const config = getConfig()
-  const msalInstance = setupMsalAuth(config, setToken, setLoginType)
+  const msalInstance = useMemo(() => {
+    const instance = setupMsalAuth(config, setToken, setLoginType)
+    authProviderTimer.logStep('MSAL instance created')
+    return instance
+  }, [config])
 
   const getLoginInfoAsync = async () => {
     if (config.loginOptions.dev && config.dev_token && qd.dev_auth) {
@@ -55,6 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     // be an active msal session.
     async function _getToken() {
       const loginInfo = await getLoginInfoAsync()
+      authProviderTimer.logStep(`Tried to retrieve token (${loginInfo.type})`)
       if (loginInfo.token) {
         setToken(loginInfo.token)
         setLoginType(loginInfo.type)
@@ -125,6 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       }
     }
 
+    authProviderTimer.logStep('Ending at Login Screen')
     return (
       <LoginScreen
         loginOptions={config.loginOptions}
@@ -150,11 +160,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const loggedInWithoutMsal = isDevAuth || isPasswordAuth
 
   if (loggedInWithoutMsal) {
+    authProviderTimer.logTotal()
     return <AuthContext.Provider value={{getTokenAsync, username}}>{children}</AuthContext.Provider>
   }
 
   if (!msalInstance) throw new Error('MSAL auth is enabled but config is not given')
 
+  authProviderTimer.logTotal()
   return (
     <AuthContext.Provider value={{getTokenAsync, username}}>
       <MsalProvider instance={msalInstance}>{children}</MsalProvider>
