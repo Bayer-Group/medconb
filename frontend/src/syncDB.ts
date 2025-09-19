@@ -26,30 +26,46 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
   })
   const manifest: Manifest = (await manifestReq.json()) as Manifest
 
+  // Check which ontologies need to be reloaded
   const countChecks = await Promise.all(
-    manifest.files.map(
-      async (entry) => entry.num_codes == (await db.codes.where({ontology_id: entry.ontology_id}).count()),
-    ),
+    manifest.files.map(async (entry) => {
+      const currentCount = await db.codes.where('ontology_id').equals(entry.ontology_id).count()
+      return {
+        entry,
+        currentCount,
+        isCorrect: entry.num_codes === currentCount,
+      }
+    }),
   )
-  const allCountsCorrect = countChecks.every(Boolean)
-  if (allCountsCorrect) return
 
-  // if there is any mismatch, clear and load everything again.
-  await db.codes.clear()
-  await db.ontologies.clear()
+  const entriesToSync = countChecks.filter((check) => !check.isCorrect).map((check) => check.entry)
 
-  // Initialize progress tracking for each ontology
-  const progressMap = new Map<string, [number, number, number]>()
+  if (entriesToSync.length === 0) return
+
+  // Clear data only for ontologies that need reloading
+  for (const entry of entriesToSync) {
+    await db.codes.where({ontology_id: entry.ontology_id}).delete()
+    await db.ontologies.where({name: entry.ontology_id}).delete()
+  }
+
+  // Initialize progress tracking for all ontologies (including ones that are already correct)
+  const progressMap = new Map<string, [number, number]>()
   manifest.files.forEach((entry) => {
-    progressMap.set(entry.ontology_id, [0, 0, entry.num_codes])
+    const isAlreadyCorrect = countChecks.find((check) => check.entry.ontology_id === entry.ontology_id)?.isCorrect
+    if (isAlreadyCorrect) {
+      // Mark as completed
+      progressMap.set(entry.ontology_id, [entry.num_codes, entry.num_codes])
+    } else {
+      // Initialize for loading
+      progressMap.set(entry.ontology_id, [0, entry.num_codes])
+    }
   })
 
   const emitProgress = () => {
     const progressArray: DBSyncProgress = manifest.files.map((entry) => ({
       name: entry.ontology_id,
-      countTotal: progressMap.get(entry.ontology_id)![2],
-      countLoaded: progressMap.get(entry.ontology_id)![1],
-      percent: progressMap.get(entry.ontology_id)![0],
+      countTotal: progressMap.get(entry.ontology_id)![1],
+      countLoaded: progressMap.get(entry.ontology_id)![0],
     }))
     onProgress(progressArray)
   }
@@ -58,7 +74,7 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
 
   const totalCount = manifest.files.reduce((i, e) => i + e.num_codes, 0)
 
-  const _syncResults = manifest.files.map(async (entry) => {
+  const _syncResults = entriesToSync.map(async (entry) => {
     const req = await fetch(`${baseUrl}assets/${entry.name}`, {
       headers: {Authorization: `Bearer ${token}`},
     })
@@ -94,8 +110,7 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
       cx += x.length
 
       // Update progress for this specific ontology
-      const percent = Math.min(100, Math.round((cx / entry.num_codes) * 100))
-      progressMap.set(entry.ontology_id, [percent, cx, entry.num_codes])
+      progressMap.set(entry.ontology_id, [cx, entry.num_codes])
       emitProgress()
 
       await db.codes.bulkPut(x)
@@ -112,8 +127,8 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
   if (!allSyncCorrect) throw new DBSyncError('SYNC_DB_MISMATCH')
 
   // Final progress update - all ontologies at 100%
-  manifest.files.forEach((entry) => {
-    progressMap.set(entry.ontology_id, 100)
+  entriesToSync.forEach((entry) => {
+    progressMap.set(entry.ontology_id, [entry.num_codes, entry.num_codes])
   })
   emitProgress()
 }

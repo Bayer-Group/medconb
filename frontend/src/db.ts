@@ -1,13 +1,16 @@
 import Dexie, {EntityTable} from 'dexie'
 import {LocalCode, LocalOntology} from '..'
 
-const db = new Dexie('myDatabase') as Dexie & {
+// old database (version)
+Dexie.delete('myDatabase')
+
+const db = new Dexie('ontologies') as Dexie & {
   codes: EntityTable<LocalCode, 'id'>
   ontologies: EntityTable<LocalOntology, 'name'>
 }
 
 db.version(1).stores({
-  codes: '&id, ontology_id',
+  codes: '&id, *ontology_id',
   ontologies: '&name',
 })
 

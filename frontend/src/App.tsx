@@ -227,7 +227,12 @@ const App: React.FC<AppProps> = () => {
                   <div style={{fontSize: 11, marginBottom: '-0.5em', color: '#666'}}>
                     {ontology.name} ({ontology.countLoaded} / {ontology.countTotal})
                   </div>
-                  <Progress percent={ontology.percent} size="small" showInfo={false} strokeColor="#52c41a" />
+                  <Progress
+                    percent={Math.round((ontology.countLoaded / ontology.countTotal) * 100)}
+                    size="small"
+                    showInfo={false}
+                    strokeColor="#52c41a"
+                  />
                 </div>
               ))}
             </div>
