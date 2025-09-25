@@ -60,12 +60,7 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
 
   timer.logStep(`Start clearing outdated ontology data`)
 
-  await Promise.all([
-    db.codes.clear(),
-    db.ontologies.clear(),
-    // db.codes.where('ontology_id').anyOf(ontologyIds).delete(),
-    // db..where('name').anyOf(ontologyIds).delete(),
-  ])
+  await db.delete({disableAutoOpen: false})
 
   timer.logStep(`Cleared outdated ontology data`)
 
