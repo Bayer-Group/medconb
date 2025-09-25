@@ -10,7 +10,7 @@ const db = new Dexie('ontologies') as Dexie & {
 }
 
 db.version(1).stores({
-  codes: '&id, *ontology_id',
+  codes: '&id, ontology_id',
   ontologies: '&name',
 })
 
