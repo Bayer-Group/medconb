@@ -64,11 +64,7 @@ export const versionCheck = async (updateLoadingScreen: (msg: string) => void) =
         updateLoadingScreen(
           'Upgrading to new version, please wait...</br>Ontologies have changed, clearing local ontology cache (can take up to a minute)...',
         )
-        console.log('Clearing local ontology cache')
-        console.time('Clearing local ontology cache')
-        await db.codes.clear()
-        await db.ontologies.clear()
-        console.timeEnd('Clearing local ontology cache')
+        await db.delete({disableAutoOpen: false})
         versionTimer.logStep('Ontology cache cleared')
       }
     } else {
