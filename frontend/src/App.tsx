@@ -249,7 +249,7 @@ const App: React.FC<AppProps> = () => {
     )
   }
 
-  getTimer('AppLoad').logTotal()
+  getTimer('AppLoad').logTotal(true)
   return (
     <Sentry.ErrorBoundary
       fallback={(props) => React.createElement(ErrorFallback, props)}
