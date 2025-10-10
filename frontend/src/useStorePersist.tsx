@@ -24,7 +24,6 @@ const useStorePersist = (interval: number) => {
   const queue = useSelector((state: RootState) => changeSetCodelistIdSelector(state))
 
   useInterval(async () => {
-    console.log('[Sync] Periodic sync start')
     if (working.current === true) {
       console.log('[Sync] Already busy')
       return
@@ -40,8 +39,6 @@ const useStorePersist = (interval: number) => {
     const changesSize = workingQueue.current.length
 
     if (changesSize == 0) {
-      console.log('[Sync] No changes to sync')
-      console.log('[Sync] Exiting')
       working.current = false
       workingQueue.current = undefined
       dispatch(clearQueue())
@@ -49,8 +46,7 @@ const useStorePersist = (interval: number) => {
     }
 
     if (saveInProgress) {
-      console.log('[Sync] Save in progress')
-      console.log('[Sync] Exiting')
+      console.log('[Sync] Save already in progress')
       working.current = false
       workingQueue.current = undefined
       dispatch(clearQueue())
@@ -103,7 +99,6 @@ const useStorePersist = (interval: number) => {
       }
     }
     console.log('[Sync] Sync complete')
-    console.log('[Sync] Exiting')
     working.current = false
     workingQueue.current = undefined
     dispatch(clearQueue())
