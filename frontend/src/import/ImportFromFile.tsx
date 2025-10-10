@@ -64,7 +64,7 @@ const ImportFromFile: React.FC<ImportFromFileProps> = ({onClose, onImport, colle
       setFile(file)
 
       const fileData = await file.arrayBuffer()
-      const workbook = XLSX.read(fileData, {type: 'array'})
+      const workbook = XLSX.read(fileData, {type: 'array', raw: true})
 
       setWorkbook(workbook)
       if (workbook.SheetNames.length === 1) {
