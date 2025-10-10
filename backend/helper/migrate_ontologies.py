@@ -137,7 +137,8 @@ ontology_map: dict[str, list[str]] = {
     "CPT": ["CPT"],
     "HCPCS": ["HCPCS"],
     "NDC": ["NDC"],
-    "SNOMEDCT_US": ["SNOMED"],
+    "SNOMED": ["SNOMED"],
+    "LOINC": ["LOINC"],
 }
 
 
