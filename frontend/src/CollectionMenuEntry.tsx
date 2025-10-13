@@ -43,7 +43,6 @@ const CollectionMenuEntry: React.FC<CollectionMenuEntryProps> = ({node, sectionK
 
   const handleUpdate = (node: NodeModel<MenuData>) => (newName: string) => {
     updateCollection({variables: {name: newName, collectionID: node.data?.id, type: node.data?.node.type}})
-    setRenaming(false)
     dispatch(renameObject({id: node.data?.id!, name: newName}))
   }
 
