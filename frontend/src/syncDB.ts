@@ -3,7 +3,6 @@ import {LocalCode, LocalOntology} from '..'
 import {db} from './db'
 import {DBSyncProgress} from './syncTypes'
 import {getTimer} from './utils/timer'
-import localforage from 'localforage'
 
 type ManifestEntry = {
   num_codes: number
@@ -31,29 +30,13 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
     },
   })
   const manifest: Manifest = (await manifestReq.json()) as Manifest
+  const manifestTotal = manifest.files.reduce((acc, entry) => entry.num_codes + acc, 0)
   timer.logStep('Retrieved manifest')
 
-  let storedCounts: Record<string, number> = ((await localforage.getItem('syncDB_insertedCounts')) as any)?.counts ?? {}
-  timer.logStep('Retrieved stored counts from localforage')
+  const totalCount = await db.codes.count()
+  timer.logStep(`Retrieved total code count (${totalCount})`)
 
-  // TODO: Implement a background check of the database and inform the app via the store about changes, so a clear and reload can happen.
-
-  // Check which ontologies need to be reloaded
-  const countChecks = await Promise.all(
-    manifest.files.map(async (entry) => {
-      const currentCount = storedCounts[entry.ontology_id] ?? -1
-      return {
-        entry,
-        currentCount,
-        isCorrect: entry.num_codes === currentCount,
-      }
-    }),
-  )
-  timer.logStep('Retrieved code counts from localforage')
-
-  let entriesToSync = countChecks.filter((check) => !check.isCorrect).map((check) => check.entry)
-
-  if (entriesToSync.length === 0) {
+  if (totalCount === manifestTotal) {
     timer.logStep('No entries to sync')
     return
   }
@@ -64,20 +47,11 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
 
   timer.logStep(`Cleared outdated ontology data`)
 
-  entriesToSync = countChecks.map((check) => check.entry)
+  let entriesToSync = manifest.files
 
   // Initialize progress tracking for all ontologies (including ones that are already correct)
   const progressMap = new Map<string, [number, number]>()
-  manifest.files.forEach((entry) => {
-    const isAlreadyCorrect = countChecks.find((check) => check.entry.ontology_id === entry.ontology_id)?.isCorrect
-    if (isAlreadyCorrect) {
-      // Mark as completed
-      progressMap.set(entry.ontology_id, [entry.num_codes, entry.num_codes])
-    } else {
-      // Initialize for loading
-      progressMap.set(entry.ontology_id, [0, entry.num_codes])
-    }
-  })
+  manifest.files.forEach((entry) => progressMap.set(entry.ontology_id, [0, entry.num_codes]))
 
   const emitProgress = () => {
     const progressArray: DBSyncProgress = manifest.files.map((entry) => ({
@@ -148,18 +122,6 @@ const syncDB = async ({baseUrl, tokenLookup, onProgress}: syncDBOptions) => {
   const allSyncCorrect = syncResults.every(Boolean)
   if (!allSyncCorrect) throw new DBSyncError('SYNC_DB_MISMATCH')
   timer.logStep('All ontologies were successfully synced')
-
-  // Store the inserted counts in localforage
-  try {
-    await localforage.setItem('syncDB_insertedCounts', {
-      timestamp: new Date().toISOString(),
-      counts: insertedCounts,
-      totalOntologies: entriesToSync.length,
-    })
-    timer.logStep('Stored inserted counts in localforage')
-  } catch (error) {
-    console.error('Failed to store inserted counts in localforage:', error)
-  }
 
   // Final progress update - all ontologies at 100%
   entriesToSync.forEach((entry) => {

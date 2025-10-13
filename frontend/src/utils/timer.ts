@@ -1,6 +1,7 @@
 export interface Timer {
   logStep: (step: string) => void
-  logTotal: () => void
+  logTotal: (close?: boolean) => void
+  done: boolean
   createSubTimer: (name: string) => Timer
   getElapsedTime: () => number
   getGlobalElapsedTime: () => number
@@ -32,7 +33,11 @@ export const createTimer = (name: string, parent?: Timer): Timer => {
 
       lastStepTime = now
     },
-    logTotal: () => timerInstance.logStep('Total time'),
+    done: false,
+    logTotal: (close = false) => {
+      if (!timerInstance.done) timerInstance.logStep('Total time')
+      if (close) timerInstance.done = true
+    },
     createSubTimer: (subName: string) => {
       return createTimer(subName, timerInstance)
     },
