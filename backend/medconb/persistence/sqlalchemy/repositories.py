@@ -647,7 +647,7 @@ class CodeRepository:
         filters = []
         if query_data.description:
             for keyword in query_data.description.split():
-                if any(c in keyword for c in ["%", "?"]):
+                if any(c in keyword for c in ["%", "_"]):
                     filters.append(d.Code.description.ilike(keyword))
                 else:
                     if keyword[0] == keyword[-1] and keyword[0] in ["'", '"']:
