@@ -1,15 +1,16 @@
 import {styled} from '@linaria/react'
 import Editor from '../components/Editor'
-import { ToggleButtonPlain} from '../scratch'
-import { useEffect, useMemo, useRef} from 'react'
+import {ToggleButtonPlain} from '../scratch'
+import {useEffect, useMemo, useRef, useState} from 'react'
 import {useIntersectionObserver} from '../useIntersectionObserver'
 import {find, last, sortBy} from 'lodash'
 import BreadCrumbs, {BreadCrumbItem} from '../components/BreadCrumbs'
-import {Col, Empty, Flex, Row, Typography} from 'antd'
+import {Button, Col, Empty, Flex, Row, Typography} from 'antd'
 import {containerHierarchyToBreadcrumbItems} from '../utils'
 import Visibility from '../components/Visibility'
 import {PropertiesRoot} from '../components/properties'
 import PropertyEntry from '../components/properties/PropertyEntry'
+import {CaretDownFilled, CaretRightFilled} from '@ant-design/icons'
 
 type SearchResultsProps = {
   entities: any[]
@@ -72,7 +73,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   return (
     <>
       {entities.map((entity: any, i: number) => {
-        const Component = compact ? SearchResultItemCompact : SearchResultItemExpanded
+        let Component = compact ? SearchResultItemCompact : SearchResultItemExpanded
+        if (entityType === 'Codelist') Component = SearchResultItemMinimalExpandable
         return (
           <Component
             key={entity.id}
@@ -97,6 +99,60 @@ type SearchResultItemProps = {
   entityType: string
   properties: any
   onBreadCrumbItemClick: (item: BreadCrumbItem) => void
+}
+
+const SearchResultItemMinimalExpandable: React.FC<SearchResultItemProps> = ({
+  onClick,
+  entity,
+  entityType,
+  onBreadCrumbItemClick,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false)
+  return (
+    <SideTitleSlim onClick={onClick} key={entity.id}>
+      <Flex align="center" gap={8} style={{marginBottom: 4}}>
+        <Button
+          size="small"
+          type="text"
+          icon={!isExpanded ? <CaretRightFilled /> : <CaretDownFilled />}
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsExpanded(!isExpanded)
+          }}></Button>
+        <Visibility visibility={entity.visibility ?? entity.containerHierarchy[0]?.visibility} />
+        <Typography.Title
+          title={entity.name}
+          style={{marginBottom: 0, maxWidth: 350, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}
+          level={4}>
+          {entity.name}
+        </Typography.Title>
+        {!isExpanded && (
+          <BreadCrumbs
+            onClick={onBreadCrumbItemClick}
+            items={containerHierarchyToBreadcrumbItems(entityType, entity.containerHierarchy)}
+          />
+        )}
+      </Flex>
+      {isExpanded && (
+        <>
+          <BreadCrumbs
+            onClick={onBreadCrumbItemClick}
+            items={containerHierarchyToBreadcrumbItems(entityType, entity.containerHierarchy)}
+          />
+          <Editor
+            readOnly={true}
+            style={{
+              WebkitLineClamp: 3,
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+            }}
+            defaultValue={entity.medicalDescription ?? entity.description}
+          />
+        </>
+      )}
+    </SideTitleSlim>
+  )
 }
 
 const SearchResultItemCompact: React.FC<SearchResultItemProps> = ({
@@ -217,6 +273,19 @@ const ItemRowRoot = styled.div`
 const SideTitle = styled.div`
   border-bottom: 1px solid #f1f2f5;
   padding: 8px 0;
+  display: block;
+  cursor: pointer;
+
+  h5 {
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+  }
+`
+
+const SideTitleSlim = styled.div`
+  border-bottom: 1px solid #f1f2f5;
+  padding: 4px 0;
   display: block;
   cursor: pointer;
 
