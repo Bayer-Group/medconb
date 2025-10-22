@@ -646,15 +646,22 @@ class CodeRepository:
 
         filters = []
         if query_data.description:
-            for keyword in query_data.description.split():
+            pattern = r"""(?:[^\s"']+|"[^"]*"|'[^']*')"""
+            keywords: list[str] = re.findall(pattern, query_data.description)
+
+            for keyword in keywords:
+                is_literal = False
+                if keyword[0] == keyword[-1] and keyword[0] in ["'", '"']:
+                    keyword = keyword[1:-1]
+                    is_literal = True
+
                 if any(c in keyword for c in ["%", "_"]):
                     filters.append(d.Code.description.ilike(keyword))
                 else:
-                    if keyword[0] == keyword[-1] and keyword[0] in ["'", '"']:
-                        keyword = keyword[1:-1].lower()
+                    if is_literal:
                         filters.append(
                             func.lower(d.Code.description).op("SIMILAR TO")(
-                                f"%\m{keyword}\M%"
+                                r"%\m" + keyword.lower() + r"\M%"
                             )
                         )
                     else:

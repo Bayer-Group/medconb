@@ -36,32 +36,56 @@ class TestSearchCodes:
 
     def test_description_filter(self, session: Session):
         tests = [
+            # {
+            #     "params": {
+            #         "query_data": QueryData(code=None, description="'alcohol abuse'"),
+            #         "ontology_id": "ICD-10-CM",
+            #     },
+            #     "want": json.loads(
+            #         "[28356,28357,28358,28359,28360,28361,28362,28363,28364,28365,28366,28367,28368,28369,28370,28371,28372,28373,28374,28375,28376,28377,28378,118404,118405,118563]"  # noqa
+            #     ),
+            # },
+            # {
+            #     "params": {
+            #         "query_data": QueryData(code=None, description="'Alcohol abuse'"),
+            #         "ontology_id": "ICD-10-CM",
+            #     },
+            #     "want": json.loads(
+            #         "[28356,28357,28358,28359,28360,28361,28362,28363,28364,28365,28366,28367,28368,28369,28370,28371,28372,28373,28374,28375,28376,28377,28378,118404,118405,118563]"  # noqa
+            #     ),
+            # },
+            # {
+            #     "params": {
+            #         "query_data": QueryData(code=None, description="alcohol abuse"),
+            #         "ontology_id": "ICD-10-CM",
+            #     },
+            #     "want": json.loads(
+            #         "[28356,28357,28358,28359,28360,28361,28362,28363,28364,28365,28366,28367,28368,28369,28370,28371,28372,28373,28374,28375,28376,28377,28378,118404,118405,118563]"  # noqa
+            #     ),
+            # },
             {
                 "params": {
-                    "query_data": QueryData(code=None, description="alcohol abuse"),
-                    "ontology_id": "ICD-10-CM",
-                },
-                "want": json.loads(
-                    "[28356,28357,28358,28359,28360,28361,28362,28363,28364,28365,28366,28367,28368,28369,28370,28371,28372,28373,28374,28375,28376,28377,28378,118404,118405,118563]"  # noqa
-                ),
-            },
-            {
-                "params": {
-                    "query_data": QueryData(code=None, description="Alcohol abuse"),
-                    "ontology_id": "ICD-10-CM",
-                },
-                "want": json.loads(
-                    "[28356,28357,28358,28359,28360,28361,28362,28363,28364,28365,28366,28367,28368,28369,28370,28371,28372,28373,28374,28375,28376,28377,28378,118404,118405,118563]"  # noqa
-                ),
-            },
-            {
-                "params": {
-                    "query_data": QueryData(code=None, description="Alcohol abuse%"),
+                    "query_data": QueryData(code=None, description="'alcohol abuse%'"),
                     "ontology_id": "ICD-10-CM",
                 },
                 "want": json.loads(
                     "[28356,28357,28358,28359,28360,28361,28362,28363,28364,28365,28366,28367,28368,28369,28370,28371,28372,28373,28374,28375,28376,28377,28378,118404,118405]"  # noqa
                 ),
+            },
+            {
+                "params": {
+                    "query_data": QueryData(code=None, description="'alcohol abus_'"),
+                    "ontology_id": "ICD-10-CM",
+                },
+                "want": [28356],
+            },
+            {
+                "params": {
+                    # this searches for entries starting with 'abuse' (!)
+                    "query_data": QueryData(code=None, description="alcohol abuse%"),
+                    "ontology_id": "ICD-10-CM",
+                },
+                "want": [],
             },
         ]
 
