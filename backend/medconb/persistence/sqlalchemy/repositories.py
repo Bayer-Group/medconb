@@ -646,10 +646,19 @@ class CodeRepository:
 
         filters = []
         if query_data.description:
-            if any(c in query_data.description for c in ["%", "?"]):
-                filters.append(d.Code.description.ilike(query_data.description))
-            else:
-                filters.append(d.Code.description.ilike(f"%{query_data.description}%"))
+            for keyword in query_data.description.split():
+                if any(c in keyword for c in ["%", "?"]):
+                    filters.append(d.Code.description.ilike(keyword))
+                else:
+                    if keyword[0] == keyword[-1] and keyword[0] in ["'", '"']:
+                        keyword = keyword[1:-1].lower()
+                        filters.append(
+                            func.lower(d.Code.description).op("SIMILAR TO")(
+                                f"%\m{keyword}\M%"
+                            )
+                        )
+                    else:
+                        filters.append(d.Code.description.ilike(f"%{keyword}%"))
         match query_data.code:
             case d.CodeSearchParam(type=d.CodeSearchParamType.ILIKE):
                 filters.append(d.Code.code.ilike(query_data.code.value))

@@ -304,10 +304,7 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
         query['code'] = null
       }
 
-      const description = f.description //https://stackoverflow.com/a/66721429/876117
-        .replace(/^[\p{P}\p{S}]+/gu, '')
-        .replace(/[\p{P}\p{S}]+$/gu, '')
-        .trim()
+      const description = f.description.trim()
 
       if (description !== '') {
         query['description'] = description

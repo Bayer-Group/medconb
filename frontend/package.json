@@ -36,7 +36,7 @@
     "apollo3-cache-persist": "^0.14.1",
     "classnames": "^2.3.1",
     "dayjs": "^1.11.10",
-    "dexie": "^4.0.10",
+    "dexie": "^4.2.0",
     "dexie-react-hooks": "^1.1.7",
     "file-saver": "^2.0.5",
     "graphql": "^16.5.0",
