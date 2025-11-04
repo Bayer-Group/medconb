@@ -63,8 +63,15 @@ const ImportFromFile: React.FC<ImportFromFileProps> = ({onClose, onImport, colle
       setFileLoading(true)
       setFile(file)
 
+      const isExcelFile = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
       const fileData = await file.arrayBuffer()
-      const workbook = XLSX.read(fileData, {type: 'array', raw: true})
+      let workbook = XLSX.read(fileData, {type: 'array', raw: !isExcelFile})
+
+      // when it is an excel (parsed workbook) but with a different extension
+      if (!isExcelFile && workbook.Workbook !== undefined) {
+        workbook = XLSX.read(fileData, {type: 'array', raw: false})
+      }
 
       setWorkbook(workbook)
       if (workbook.SheetNames.length === 1) {
