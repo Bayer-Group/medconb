@@ -10,9 +10,9 @@ const UserDisplay: React.FC<{userId: string}> = ({userId}) => {
     fetchPolicy: 'cache-first',
   })
 
-  if (!data) return <Skeleton />
+  if (!data) return <Skeleton /> // still loading
 
-  return <>{data.users[0].name ? data.users[0].name : <i>Deleted User</i>}</>
+  return data.users?.length > 0 && data.users[0].name ? <>{data.users[0].name}</> : <i>Deleted User</i>
 }
 
 export default UserDisplay
