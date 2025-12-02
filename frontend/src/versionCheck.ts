@@ -60,7 +60,7 @@ export const versionCheck = async (updateLoadingScreen: (msg: string) => void) =
       console.timeEnd('Clearing local cache')
       versionTimer.logStep('Local cache cleared')
 
-      if (versionSuffix != storedVersionSuffix) {
+      if (storedVersionSuffix && versionSuffix != storedVersionSuffix) {
         updateLoadingScreen(
           'Upgrading to new version, please wait...</br>Ontologies have changed, clearing local ontology cache (can take up to a minute)...',
         )

@@ -1,8 +1,8 @@
 import {CaretDownFilled, CaretRightFilled, MinusCircleFilled, PlusCircleFilled} from '@ant-design/icons'
 import {useQuery} from '@apollo/client'
-import {Button, Flex, Skeleton, Space, Typography} from 'antd'
+import {Button, Checkbox, Flex, Skeleton, Space, Typography} from 'antd'
 import {keys, size, xor} from 'lodash'
-import {useState} from 'react'
+import {forwardRef, useImperativeHandle, useState} from 'react'
 import {useSelector} from 'react-redux'
 import {Codelist} from '..'
 import {FETCH_CODE_LIST} from './graphql'
@@ -13,17 +13,36 @@ import {ChangeSet} from './store/changes'
 const {Text} = Typography
 
 type AppResetModalProps = {}
+type AppResetModalRef = {
+  getCheckboxState: () => boolean
+}
 
-const AppResetModal: React.FC<AppResetModalProps> = () => {
+const AppResetModal = forwardRef<AppResetModalRef, AppResetModalProps>((props, ref) => {
   const changeSet = useSelector((state: RootState) => state.changes.changeSet)
   const [changesExpanded, setChangesExpanded] = useState(false)
+  const [resetOntologies, setResetOntologies] = useState(false)
+
+  useImperativeHandle(ref, () => ({
+    getCheckboxState: () => resetOntologies,
+  }))
+
   return (
     <Flex vertical>
       {size(changeSet) === 0 && (
-        <Typography.Text>
-          There are no unsaved changes. You will be logged out, all open Codelists, Phenotypes, etc. will be closed. The
-          UI will be reset and all data will be re-loaded from the server.
-        </Typography.Text>
+        <>
+          <Typography.Text>
+            There are no unsaved changes. You will be logged out, all open Codelists, Phenotypes, etc. will be closed.
+            The UI will be reset and all data will be re-loaded from the server.
+          </Typography.Text>
+          <p>
+            <Checkbox
+              style={{margin: 8}}
+              checked={resetOntologies}
+              onChange={(e) => setResetOntologies(e.target.checked)}>
+              Also re-download ontologies (this will take longer but ensures fresh data)
+            </Checkbox>
+          </p>
+        </>
       )}
       {size(changeSet) > 0 && (
         <Flex vertical gap={8}>
@@ -33,6 +52,14 @@ const AppResetModal: React.FC<AppResetModalProps> = () => {
             )} codelists that are not saved yet. Normally they should be saved within the next 10 seconds if you have an internet connection.
             When you proceed anyway, these changes will be lost. You will be logged out, all open Codelists, Phenotypes, etc. will be closed. The UI will be reset and all data will be re-loaded from the server.`}
           </Typography.Text>
+          <p>
+            <Checkbox
+              style={{margin: 8}}
+              checked={resetOntologies}
+              onChange={(e) => setResetOntologies(e.target.checked)}>
+              Also re-download ontologies (this will take longer but ensures fresh data)
+            </Checkbox>
+          </p>
 
           <Button
             size="small"
@@ -61,7 +88,7 @@ const AppResetModal: React.FC<AppResetModalProps> = () => {
       )}
     </Flex>
   )
-}
+})
 
 type CodelistChangeSetProps = {
   codelistId: string

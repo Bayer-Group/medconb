@@ -190,7 +190,7 @@ const App: React.FC<AppProps> = () => {
               <Button
                 danger
                 onClick={() => {
-                  void resetApp()
+                  void resetApp(true)
                 }}>
                 Reset
               </Button>

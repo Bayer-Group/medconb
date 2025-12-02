@@ -1,4 +1,4 @@
-import React, {createRef, useCallback, useContext, useEffect, useMemo, useState} from 'react'
+import React, {createRef, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react'
 import {styled} from '@linaria/react'
 import {ExclamationCircleOutlined, MenuOutlined} from '@ant-design/icons'
 import {App, Button, Dropdown, Modal, Progress, Space, Spin} from 'antd'
@@ -39,6 +39,7 @@ const RootWorkspace = () => {
   const resetApp = useReset()
   const [aboutOpen, setAboutOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const appResetModalRef = useRef<{getCheckboxState: () => boolean}>(null)
   const enableInfoBubbles = useSelector((state: RootState) => state.ui.enableInfoBubbles)
   const openObjects = useSelector((state: RootState) => state.workspace.openObjects)
   const sideBarOpen = useSelector((state: RootState) => state.ui.sideBarOpen)
@@ -114,11 +115,12 @@ const RootWorkspace = () => {
         await modal.confirm({
           title: 'Are you sure that you want to reset the application state?',
           icon: <ExclamationCircleOutlined />,
-          content: <AppResetModal />,
+          content: <AppResetModal ref={appResetModalRef} />,
           okText: 'Reset',
           cancelText: 'Cancel',
           onOk: async () => {
-            await resetApp()
+            const resetOntologies = appResetModalRef.current?.getCheckboxState() || false
+            await resetApp(resetOntologies)
             return
           },
         })
