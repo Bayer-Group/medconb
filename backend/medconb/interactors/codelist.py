@@ -269,6 +269,7 @@ class ImportCodelists(BaseCodelistInteractor):  # noqa R901 - too complex
             )
 
             if not import_result:
+                report.report = "No valid codes to import."
                 stats.skipped += 1
                 continue
 
