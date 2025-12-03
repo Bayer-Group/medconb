@@ -255,6 +255,7 @@ class ImportCodelists(BaseCodelistInteractor):  # noqa R901 - too complex
                 codelist_data, existing_cl_names
             )
             if not validated_codesets:
+                report.report = "No valid codes to import."
                 stats.skipped += 1
                 continue
 
