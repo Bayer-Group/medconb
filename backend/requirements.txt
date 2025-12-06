@@ -38,5 +38,5 @@ starlette-context==0.4.0
 typing-inspection==0.4.1
 typing_extensions==4.14.1
 tzdata==2025.2
-urllib3==2.5.0
+urllib3==2.6.0
 uvicorn==0.35.0
