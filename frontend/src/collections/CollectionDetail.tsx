@@ -335,26 +335,25 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({id, navigateEntity, 
             </div>
           )}
         </Col>
-        <Col span={1}>
-          <Divider type="vertical" />
+
+        <Col span={1} style={{display: 'flex', alignItems: 'stretch'}}>
+          <Divider type="vertical" style={{height: 'auto', margin: 0}} />
         </Col>
 
         <Col span={11}>
-          {data.collection.itemType === 'Phenotype' && (
-            <div data-tour-target="__collection-properties__">
-              <ToggleButton isOpen={propertiesOpen} onClick={() => setPropertiesOpen(!propertiesOpen)}>
-                PROPERTIES
-              </ToggleButton>
-              {propertiesOpen && (
-                <PropertiesEditor
-                  owner={data.collection.ownerID}
-                  onChange={isReadOnly ? undefined : handlePropertiesUpdate}
-                  properties={propData.properties.filter((p: Property) => p.class === 'Collection')}
-                  propertyValues={data.collection.properties.map((p: PropertyValue) => omit(p, ['__typename']))}
-                />
-              )}
-            </div>
-          )}
+          <div data-tour-target="__collection-properties__">
+            <ToggleButton isOpen={propertiesOpen} onClick={() => setPropertiesOpen(!propertiesOpen)}>
+              PROPERTIES
+            </ToggleButton>
+            {propertiesOpen && (
+              <PropertiesEditor
+                owner={data.collection.ownerID}
+                onChange={isReadOnly ? undefined : handlePropertiesUpdate}
+                properties={propData.properties.filter((p: Property) => p.class === 'Collection')}
+                propertyValues={data.collection.properties.map((p: PropertyValue) => omit(p, ['__typename']))}
+              />
+            )}
+          </div>
         </Col>
       </Row>
       {data.collection.itemType === 'Codelist' && (
