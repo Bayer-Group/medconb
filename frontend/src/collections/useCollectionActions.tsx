@@ -12,12 +12,14 @@ import {CREATE_CODE_LIST, CREATE_PHENOTYPE, DELETE_COLLECTION, FETCH_COLLECTION,
 import {useMutation} from '@apollo/client'
 import CodelistImporter from '../import/CodelistImporter'
 import ShareCollectionDialog from '../ShareCollectionDialog'
+import CloneCollectionDialog from './CloneCollectionDialog'
 
 const useCollectionActions = (collection: Collection, isReadOnly: boolean, options?: {onRename?: () => void}) => {
   const dispatch = useDispatch()
   const exporter = useExport()
   const [shareOpen, setShareOpen] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [cloneOpen, setCloneOpen] = useState(false)
   const activeCollections: any[] = []
   const {modal} = App.useApp()
 
@@ -61,11 +63,13 @@ const useCollectionActions = (collection: Collection, isReadOnly: boolean, optio
         items.push({label: 'Rename Collection', key: 'rename'})
       }
 
-      items.push({label: 'Duplicate Collection', key: 'duplicate', disabled: true})
+      items.push({label: 'Clone Collection', key: 'clone'})
       items.push({type: 'divider'})
       items.push({label: 'Delete Collection', key: 'delete'})
       items.push({type: 'divider'})
       items.push({label: 'Manage Access', key: 'share'})
+    } else {
+      items.push({label: 'Clone to Workspace', key: 'clone'})
     }
 
     items.push({label: 'Details of Collection', key: 'details', disabled: true})
@@ -172,6 +176,9 @@ const useCollectionActions = (collection: Collection, isReadOnly: boolean, optio
         case 'share':
           setShareOpen(true)
           break
+        case 'clone':
+          setCloneOpen(true)
+          break
         case 'details':
           // onClickDetails()
           break
@@ -239,9 +246,16 @@ const useCollectionActions = (collection: Collection, isReadOnly: boolean, optio
             onCancel={() => setShareOpen(false)}
           />
         )}
+        {cloneOpen && (
+          <CloneCollectionDialog
+            collection={collection}
+            onClose={() => setCloneOpen(false)}
+            onCancel={() => setCloneOpen(false)}
+          />
+        )}
       </>
     )
-  }, [importing, shareOpen])
+  }, [importing, shareOpen, cloneOpen, collection])
 
   return {collectionMenu, handleMenuClick, addPhenotype, addCodelist, actionsDom}
 }

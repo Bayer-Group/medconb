@@ -8,6 +8,7 @@ mutation = MutationType()
 mutation.set_field("createCollection", InteractorResolver(interactors.CreateCollection))
 mutation.set_field("deleteCollection", InteractorResolver(interactors.DeleteCollection))
 mutation.set_field("updateCollection", InteractorResolver(interactors.UpdateCollection))
+mutation.set_field("cloneCollection", InteractorResolver(interactors.CloneCollection))
 mutation.set_field("moveCollection", InteractorResolver(interactors.MoveCollection))
 mutation.set_field(
     "setCollectionPermissions", InteractorResolver(interactors.SetCollectionPermissions)

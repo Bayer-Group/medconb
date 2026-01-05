@@ -158,6 +158,15 @@ export const MOVE_COLLECTION = gql`
     moveCollection(collectionID: $collectionID, refCollectionID: $refCollectionID)
   }
 `
+
+export const CLONE_COLLECTION = gql`
+  mutation cloneCollection($collectionID: ID!) {
+    cloneCollection(collectionID: $collectionID) {
+      id
+      name
+    }
+  }
+`
 //moveCollection(collectionID: ID!, refcollectionID: ID): Boolean
 
 export const DELETE_COLLECTION = gql`

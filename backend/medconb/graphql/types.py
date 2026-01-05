@@ -205,6 +205,10 @@ class ClonePhenotypeRequestDto(BaseModel):
     position: Optional[ReferencePosition] = None
 
 
+class CloneCollectionRequestDto(BaseModel):
+    collection_id: CollectionID
+
+
 class CreateCodelistRequestDto(BaseModel):
     position: ReferencePosition
     name: str

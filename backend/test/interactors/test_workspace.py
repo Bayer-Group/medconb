@@ -3,6 +3,7 @@ import pytest
 import medconb.domain as d
 import medconb.graphql.types as gql
 from medconb.interactors import (
+    CloneCollection,
     Collection,
     CollectionNotExistsException,
     CreateCollection,
@@ -291,3 +292,207 @@ class TestSetCollectionPermissions:
         with pytest.raises(CollectionNotExistsException) as excinfo:
             i8r(dto)
         assert f"ID {dto.collection_id}" in repr(excinfo.value)
+
+
+class TestCloneCollection:
+    def test_clone_codelist_collection(self, session: Session, user: d.User):
+        """Test cloning a collection with codelists"""
+        session = MockSession()
+
+        # Create source collection with codelists (shared with user)
+        collection = create_Collection(
+            id=_c_id(1),
+            name="Source Collection",
+            item_ids=[_cl_id(1), _cl_id(2)],
+            _owner_id=_u_id(2),
+            shared_with={user},
+        )
+        session.add(collection)
+
+        codelist1 = create_Codelist(
+            id=_cl_id(1), name="Codelist 1", container=collection.to_spec()
+        )
+        codelist2 = create_Codelist(
+            id=_cl_id(2), name="Codelist 2", container=collection.to_spec()
+        )
+        session.add(codelist1)
+        session.add(codelist2)
+
+        i8r = CloneCollection(session, user)
+        dto = gql.CloneCollectionRequestDto(collection_id=_c_id(1))
+
+        result = i8r(dto)
+
+        # Verify new collection was created
+        assert result.name == "Source Collection"
+        assert result.item_type == d.ItemType.Codelist
+        assert result.reference_id == _c_id(1)
+        assert result.owner_id == user.id
+        assert result.shared_with == set()  # Not shared with anyone
+
+        # Verify collection was added to workspace
+        assert user.workspace.contains_collection(result.id)
+
+        # Verify codelists were cloned
+        assert len(result.item_ids) == 2
+
+    def test_clone_with_name_conflict(self, session: Session, user: d.User):
+        """Test that name conflicts are handled with (copy) suffix"""
+        session = MockSession()
+
+        # Create source collection (shared with user)
+        collection = create_Collection(
+            id=_c_id(1),
+            name="Source Collection",
+            _owner_id=_u_id(2),
+            shared_with={user},
+        )
+        session.add(collection)
+
+        # Add existing collection with same name to workspace
+        existing = create_Collection(
+            id=_c_id(3), name="Source Collection", _owner_id=user.id
+        )
+        user.workspace.add_collection(existing.id)
+        session.add(existing)
+
+        i8r = CloneCollection(session, user)
+        dto = gql.CloneCollectionRequestDto(collection_id=_c_id(1))
+
+        result = i8r(dto)
+
+        # Verify name was modified to avoid conflict
+        assert result.name == "Source Collection (copy)"
+        assert result.shared_with == set()  # Not shared with anyone
+
+    def test_clone_with_multiple_name_conflicts(self, session: Session, user: d.User):
+        """Test handling multiple name conflicts"""
+        session = MockSession()
+
+        # Create source collection (shared with user)
+        collection = create_Collection(
+            id=_c_id(1),
+            name="Source Collection",
+            _owner_id=_u_id(2),
+            shared_with={user},
+        )
+        session.add(collection)
+
+        # Add existing collections with conflicting names
+        existing1 = create_Collection(
+            id=_c_id(3), name="Source Collection", _owner_id=user.id
+        )
+        existing2 = create_Collection(
+            id=_c_id(4), name="Source Collection (copy)", _owner_id=user.id
+        )
+        user.workspace.add_collection(existing1.id)
+        user.workspace.add_collection(existing2.id)
+        session.add(existing1)
+        session.add(existing2)
+
+        i8r = CloneCollection(session, user)
+        dto = gql.CloneCollectionRequestDto(collection_id=_c_id(1))
+
+        result = i8r(dto)
+
+        # Verify name was modified with incremented suffix
+        assert result.name == "Source Collection (copy 2)"
+        assert result.shared_with == set()  # Not shared with anyone
+
+    def test_clone_invalid_collection(self, session: Session, user: d.User):
+        """Test cloning non-existent collection raises exception"""
+        session = MockSession()
+
+        i8r = CloneCollection(session, user)
+        dto = gql.CloneCollectionRequestDto(collection_id=_c_id(999))
+
+        with pytest.raises(CollectionNotExistsException) as excinfo:
+            i8r(dto)
+        assert f"ID {dto.collection_id}" in repr(excinfo.value)
+
+    def test_clone_preserves_description(self, session: Session, user: d.User):
+        """Test that description is preserved when cloning"""
+        session = MockSession()
+
+        collection = create_Collection(
+            id=_c_id(1),
+            name="Test Collection",
+            description="Test Description",
+            _owner_id=_u_id(2),
+            shared_with={user},
+        )
+        session.add(collection)
+
+        i8r = CloneCollection(session, user)
+        dto = gql.CloneCollectionRequestDto(collection_id=_c_id(1))
+
+        result = i8r(dto)
+
+        assert result.description == "Test Description"
+        assert result.shared_with == set()  # Not shared with anyone
+
+    def test_clone_properties_handling(  # noqa: radon complexity
+        self, session: Session, user: d.User
+    ):
+        """
+        Test that timestamp/user properties are updated and other
+        properties are copied
+        """
+        session = MockSession()
+
+        other_user = d.User(
+            id=_u_id(2),
+            external_id="OTHER",
+            name="Other User",
+            email=None,
+            password_hash=None,
+            workspace=None,
+        )
+
+        # Create source collection with various properties
+        collection = create_Collection(
+            id=_c_id(1),
+            name="Source Collection",
+            _owner_id=other_user.id,
+            shared_with={user},
+            properties={
+                "Created": "2025-01-01T00:00:00Z",
+                "Last Edited": "2025-01-02T00:00:00Z",
+                "Created By": str(other_user.id),
+                "Last Edited By": str(other_user.id),
+                "Custom Property": "Custom Value",
+                "Another Property": 123,
+            },
+        )
+        session.add(collection)
+
+        i8r = CloneCollection(session, user)
+        dto = gql.CloneCollectionRequestDto(collection_id=_c_id(1))
+
+        result = i8r(dto)
+
+        # Verify timestamp/user properties are set for new collection
+        assert "Created" in result.properties
+        assert "Created By" in result.properties
+
+        # Properties are stored as tuples (property_id, value)
+        # These should be different from the source (updated to current user/time)
+        assert result.properties["Created"][1] != collection.properties["Created"]
+        assert result.properties["Created By"][1] == str(user.id)
+
+        # Last Edited properties are not set on creation (only on updates)
+        # so they should not exist in the result
+        assert "Last Edited" not in result.properties
+        assert "Last Edited By" not in result.properties
+
+        # Custom properties should be copied from the source collection
+        assert "Custom Property" in result.properties
+        assert (
+            result.properties["Custom Property"]
+            == collection.properties["Custom Property"]
+        )
+        assert "Another Property" in result.properties
+        assert (
+            result.properties["Another Property"]
+            == collection.properties["Another Property"]
+        )

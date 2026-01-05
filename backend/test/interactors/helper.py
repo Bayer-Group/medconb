@@ -158,7 +158,7 @@ class MockSession:
 
     @property
     def property_repository(self):
-        return NotImplemented
+        return self.PropertyRepository()
 
     class Repository:
         def __init__(self, session: "MockSession", type_):
@@ -212,3 +212,86 @@ class MockSession:
 
         def new_workspace_id(self) -> d.WorkspaceID:
             return d.WorkspaceID(bytes=os.urandom(16), version=4)
+
+    class PropertyRepository:
+        def get_all(self, class_name):
+            """Return properties for MockSession"""
+            if class_name == d.PropertyClass.Collection:
+                return [
+                    d.Property(
+                        id=1,
+                        name="Created",
+                        class_name=d.PropertyClass.Collection,
+                        dtype=d.PropertyDtype.Time,
+                        dtype_meta={},
+                        required=False,
+                        read_only=True,
+                    ),
+                    d.Property(
+                        id=2,
+                        name="Last Edited",
+                        class_name=d.PropertyClass.Collection,
+                        dtype=d.PropertyDtype.Time,
+                        dtype_meta={},
+                        required=False,
+                        read_only=True,
+                    ),
+                    d.Property(
+                        id=3,
+                        name="Created By",
+                        class_name=d.PropertyClass.Collection,
+                        dtype=d.PropertyDtype.User,
+                        dtype_meta={},
+                        required=False,
+                        read_only=True,
+                    ),
+                    d.Property(
+                        id=4,
+                        name="Last Edited By",
+                        class_name=d.PropertyClass.Collection,
+                        dtype=d.PropertyDtype.User,
+                        dtype_meta={},
+                        required=False,
+                        read_only=True,
+                    ),
+                ]
+            elif class_name == d.PropertyClass.Phenotype:
+                return [
+                    d.Property(
+                        id=5,
+                        name="Created",
+                        class_name=d.PropertyClass.Phenotype,
+                        dtype=d.PropertyDtype.Time,
+                        dtype_meta={},
+                        required=False,
+                        read_only=True,
+                    ),
+                    d.Property(
+                        id=6,
+                        name="Last Edited",
+                        class_name=d.PropertyClass.Phenotype,
+                        dtype=d.PropertyDtype.Time,
+                        dtype_meta={},
+                        required=False,
+                        read_only=True,
+                    ),
+                    d.Property(
+                        id=7,
+                        name="Created By",
+                        class_name=d.PropertyClass.Phenotype,
+                        dtype=d.PropertyDtype.User,
+                        dtype_meta={},
+                        required=False,
+                        read_only=True,
+                    ),
+                    d.Property(
+                        id=8,
+                        name="Last Edited By",
+                        class_name=d.PropertyClass.Phenotype,
+                        dtype=d.PropertyDtype.User,
+                        dtype_meta={},
+                        required=False,
+                        read_only=True,
+                    ),
+                ]
+            return []

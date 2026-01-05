@@ -159,6 +159,127 @@ class DeleteCollection(BaseInteractor):
         return True
 
 
+class CloneCollection(BaseInteractor):
+    """
+    Clone a Collection into the current user's workspace.
+    All items (codelists or phenotypes) in the collection will be cloned as well.
+    """
+
+    def _get_unique_name(self, base_name: str) -> str:
+        """Generate a unique name for the cloned collection, avoiding conflicts."""
+        workspace_collections = self.collection_repository.get_all(
+            self.workspace.collection_ids
+        )
+        illegal_names = [c.name for c in workspace_collections]
+
+        new_name = base_name
+        if new_name in illegal_names:
+            new_name = f"{base_name} (copy)"
+            i = 2
+            while new_name in illegal_names:
+                new_name = f"{base_name} (copy {i})"
+                i += 1
+
+        return new_name
+
+    def _create_collection_with_properties(
+        self, source_collection: d.Collection, new_name: str
+    ) -> d.Collection:
+        """
+        Create a new collection with fresh system properties and copied
+        custom properties.
+        """
+        all_props = self.session.property_repository.get_all(d.PropertyClass.Collection)
+        obj_properties = d.init_property_bag(
+            all_props=all_props, current_user_id=self.user.id
+        )
+
+        # Copy custom properties from source (non-system properties)
+        system_property_names = {
+            "Created",
+            "Last Edited",
+            "Created By",
+            "Last Edited By",
+        }
+        for prop_name, prop_value in source_collection.properties.items():
+            if prop_name not in system_property_names:
+                obj_properties[prop_name] = prop_value
+
+        new_collection = d.Collection(
+            id=self.collection_repository.new_id(),
+            name=new_name,
+            item_type=source_collection.item_type,
+            item_ids=[],
+            description=source_collection.description,
+            properties=obj_properties,
+            reference_id=source_collection.id,
+            _owner_id=self.user.id,
+            shared_with=set(),  # Not shared with anyone
+        )
+
+        self.session.add(new_collection)
+        self.workspace.add_collection(new_collection.id)
+
+        return new_collection
+
+    def _clone_collection_items(
+        self, source_collection: d.Collection, target_collection: d.Collection
+    ) -> None:
+        """Clone all items from source collection to target collection."""
+        from .codelist import CloneCodelist
+        from .phenotype import ClonePhenotype
+
+        match source_collection.item_type:
+            case d.ItemType.Codelist:
+                codelists = self.session.codelist_repository.get_all(
+                    source_collection.item_ids
+                )
+                codelists.sort(
+                    key=lambda x: source_collection.item_ids.index(x.id), reverse=True
+                )
+                for codelist in codelists:
+                    CloneCodelist(self.session, self.user)(
+                        gql.CloneCodelistRequestDto(
+                            codelist_id=codelist.id,
+                            position=gql.ReferencePosition(
+                                container_id=target_collection.id
+                            ),
+                        )
+                    )
+            case d.ItemType.Phenotype:
+                phenotypes = self.session.phenotype_repository.get_all(
+                    source_collection.item_ids
+                )
+                phenotypes.sort(
+                    key=lambda x: source_collection.item_ids.index(x.id), reverse=True
+                )
+                for phenotype in phenotypes:
+                    ClonePhenotype(self.session, self.user)(
+                        gql.ClonePhenotypeRequestDto(
+                            phenotype_id=phenotype.id,
+                            position=gql.ReferencePosition(
+                                container_id=target_collection.id
+                            ),
+                        )
+                    )
+
+    def __call__(self, dto: gql.CloneCollectionRequestDto) -> d.Collection:
+        source_collection = self.collection_repository.get(dto.collection_id)
+        if source_collection is None:
+            raise CollectionNotExistsException(dto.collection_id)
+
+        if not self.is_readable_by_current_user(source_collection):
+            raise CollectionNotExistsException(dto.collection_id)
+
+        new_name = self._get_unique_name(source_collection.name)
+        new_collection = self._create_collection_with_properties(
+            source_collection, new_name
+        )
+        self._clone_collection_items(source_collection, new_collection)
+
+        return new_collection
+
+
 class SetCollectionPermissions(BaseInteractor):
     """
     Set the permissions of a Collection from your workspace.

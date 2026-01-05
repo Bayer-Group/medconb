@@ -41,6 +41,7 @@ type Mutation {
   ): Collection
   deleteCollection(collectionID: ID!): Boolean
   moveCollection(collectionID: ID!, refCollectionID: ID): Boolean
+  cloneCollection(collectionID: ID!): Collection!
   setCollectionPermissions(collectionID: ID!, readerIds: [ID!]!): Boolean
 
   createPhenotype(

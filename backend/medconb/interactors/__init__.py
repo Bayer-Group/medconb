@@ -41,6 +41,7 @@ from .query import (
 )
 from .user import UpdateMe
 from .workspace import (
+    CloneCollection,
     CreateCollection,
     DeleteCollection,
     MoveCollection,

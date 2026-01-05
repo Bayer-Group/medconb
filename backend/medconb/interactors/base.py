@@ -38,7 +38,7 @@ class BaseInteractor(ABC):
         Checks if a ContainerItem or a Collection is readable by the current sessions
         user.
 
-        Not for future expansions: It assumes that there are no nested Collections.
+        Note for future expansions: It assumes that there are no nested Collections.
         """
         root_collection = self._must_load_root_collection_of(obj)
         return d.collection_readable_by_user(root_collection, self.user)
