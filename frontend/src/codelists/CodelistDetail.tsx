@@ -33,7 +33,6 @@ const CodelistDetail: React.FC<CodelistDetailProps> = ({id, navigateEntity, onCl
   const [codes, setCodes] = useState<LocalCode[]>()
   // const client = useApolloClient()
   // const {ontologies} = client.readQuery({query: ONTOLOGIES})
-  const allowComparision = useSelector((state: RootState) => state.workspace.openCodelists.length > 0)
   const {loading, error, data} = useQuery(FETCH_CODE_LIST, {
     variables: {
       codelistID: id,
@@ -65,10 +64,9 @@ const CodelistDetail: React.FC<CodelistDetailProps> = ({id, navigateEntity, onCl
     }
   }, [ontology?.name])
 
-  const {menuItems, handleMenuClick} = useCodelistActions(
+  const {menuItems, handleMenuClick, actionsDom} = useCodelistActions(
     data?.codelist,
     data?.codelist.containerHierarchy[0]?.visibility !== 'Private',
-    allowComparision,
   )
 
   if (!data) {
@@ -87,21 +85,23 @@ const CodelistDetail: React.FC<CodelistDetailProps> = ({id, navigateEntity, onCl
   }
 
   return (
-    <Root>
-      <Row style={{marginBottom: 20}} justify={'space-between'}>
-        <Col>
-          <Flex align="center" gap={8} style={{marginBottom: 4}}>
-            <Visibility visibility={data.codelist.containerHierarchy[0].visibility} />
-            <Typography.Title style={{marginBottom: 0}} level={4}>
-              {data.codelist.name}
-            </Typography.Title>
-          </Flex>
-          <BreadCrumbs
-            // visibility={data.codelist.containerHierarchy[0]?.visibility}
-            onClick={handleBreadCrumbClick}
-            items={containerHierarchyToBreadcrumbItems('Codelist', data.codelist.containerHierarchy)}
-          />
-          {/* {data.codelist.referenceID && (
+    <>
+      {actionsDom}
+      <Root>
+        <Row style={{marginBottom: 20}} justify={'space-between'}>
+          <Col>
+            <Flex align="center" gap={8} style={{marginBottom: 4}}>
+              <Visibility visibility={data.codelist.containerHierarchy[0].visibility} />
+              <Typography.Title style={{marginBottom: 0}} level={4}>
+                {data.codelist.name}
+              </Typography.Title>
+            </Flex>
+            <BreadCrumbs
+              // visibility={data.codelist.containerHierarchy[0]?.visibility}
+              onClick={handleBreadCrumbClick}
+              items={containerHierarchyToBreadcrumbItems('Codelist', data.codelist.containerHierarchy)}
+            />
+            {/* {data.codelist.referenceID && (
             <div>
               <Space>
                 <LinkOutlined />
@@ -114,71 +114,72 @@ const CodelistDetail: React.FC<CodelistDetailProps> = ({id, navigateEntity, onCl
               </Space>
             </div>
           )} */}
-          <div>
-            <Space size={'middle'}>
-              {(data.codelist.codesets ?? []).map((codeset: CodeSet) => (
-                <Indicator key={codeset.ontology.name}>
-                  <span>{codeset.ontology.name}</span>
-                  <Count>{codeset.codes.length}</Count>
-                </Indicator>
-              ))}
-            </Space>
-          </div>
-        </Col>
-        <Col flex={1}>
-          <Flex justify="flex-end" gap={8}>
-            <Dropdown menu={{items: menuItems, onClick: handleMenuClick}} placement="bottomRight" trigger={['click']}>
-              <Button onClick={(e) => e.stopPropagation()} size="small" type="default">
-                <Space>
-                  Actions
-                  <CaretDownFilled />
-                </Space>
-              </Button>
-            </Dropdown>
-
-            {onClose && (
-              <Button size="small" type="text" icon={<Icon component={() => <CloseIcon />} />} onClick={onClose} />
-            )}
-          </Flex>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col>
-          <ToggleButton isOpen={descOpen} onClick={() => setDescOpen(!descOpen)}>
-            DESCRIPTION
-          </ToggleButton>
-
-          {descOpen && (
-            <div style={{marginLeft: 30}}>
-              <Editor
-                disableExtensions={['checkbox_item', 'checkbox_list', 'container_notice']}
-                defaultValue={data.codelist.description ?? ''}
-                readOnly
-              />
+            <div>
+              <Space size={'middle'}>
+                {(data.codelist.codesets ?? []).map((codeset: CodeSet) => (
+                  <Indicator key={codeset.ontology.name}>
+                    <span>{codeset.ontology.name}</span>
+                    <Count>{codeset.codes.length}</Count>
+                  </Indicator>
+                ))}
+              </Space>
             </div>
-          )}
-        </Col>
-      </Row>
-      <Row>
-        <Col span={24}>
-          <Toolbar>
-            <Space>
-              <SelectOntology onChange={(onto) => setOntology(onto)} value={ontology} ontologies={ontologies} />
-            </Space>
-          </Toolbar>
-        </Col>
-      </Row>
-      <Row style={{flex: 1}}>
-        <Col span={24}>
-          <Scrollbars style={{flex: 1}}>{codes && <CodesList codes={codes} />}</Scrollbars>
-        </Col>
-      </Row>
+          </Col>
+          <Col flex={1}>
+            <Flex justify="flex-end" gap={8}>
+              <Dropdown menu={{items: menuItems, onClick: handleMenuClick}} placement="bottomRight" trigger={['click']}>
+                <Button onClick={(e) => e.stopPropagation()} size="small" type="default">
+                  <Space>
+                    Actions
+                    <CaretDownFilled />
+                  </Space>
+                </Button>
+              </Dropdown>
 
-      {/*<Summary>
+              {onClose && (
+                <Button size="small" type="text" icon={<Icon component={() => <CloseIcon />} />} onClick={onClose} />
+              )}
+            </Flex>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col>
+            <ToggleButton isOpen={descOpen} onClick={() => setDescOpen(!descOpen)}>
+              DESCRIPTION
+            </ToggleButton>
+
+            {descOpen && (
+              <div style={{marginLeft: 30}}>
+                <Editor
+                  disableExtensions={['checkbox_item', 'checkbox_list', 'container_notice']}
+                  defaultValue={data.codelist.description ?? ''}
+                  readOnly
+                />
+              </div>
+            )}
+          </Col>
+        </Row>
+        <Row>
+          <Col span={24}>
+            <Toolbar>
+              <Space>
+                <SelectOntology onChange={(onto) => setOntology(onto)} value={ontology} ontologies={ontologies} />
+              </Space>
+            </Toolbar>
+          </Col>
+        </Row>
+        <Row style={{flex: 1}}>
+          <Col span={24}>
+            <Scrollbars style={{flex: 1}}>{codes && <CodesList codes={codes} />}</Scrollbars>
+          </Col>
+        </Row>
+
+        {/*<Summary>
         <p>Here goes summary</p>
       </Summary> */}
-    </Root>
+      </Root>
+    </>
   )
 }
 

@@ -202,7 +202,7 @@ const CodelistCell = ({
   readOnly: boolean
 }) => {
   const [renaming, setRenaming] = useState(false)
-  const {menuItems, handleMenuClick, updateCodelist} = useCodelistActions(codelist, readOnly, {
+  const {menuItems, handleMenuClick, updateCodelist, actionsDom} = useCodelistActions(codelist, readOnly, {
     onRename: () => setRenaming(true),
   })
 
@@ -215,22 +215,25 @@ const CodelistCell = ({
   )
 
   return (
-    <Dropdown menu={{items: menuItems, onClick: handleMenuClick}} trigger={['contextMenu']}>
-      <span
-        style={{cursor: renaming ? 'initial' : 'pointer', color: renaming ? 'initial' : '#1677ff'}}
-        onClick={(e) => {
-          e.preventDefault()
-          if (!renaming) onCodelistClick()
-        }}>
-        <EditableP
-          editStyle={{background: '#f1f2f5', color: 'rgba(0, 0, 0, 0.88)'}}
-          onCancel={() => setRenaming(false)}
-          value={codelist.name ?? ''}
-          editMode={renaming}
-          onSave={handleRename}
-        />
-      </span>
-    </Dropdown>
+    <>
+      {actionsDom}
+      <Dropdown menu={{items: menuItems, onClick: handleMenuClick}} trigger={['contextMenu']}>
+        <span
+          style={{cursor: renaming ? 'initial' : 'pointer', color: renaming ? 'initial' : '#1677ff'}}
+          onClick={(e) => {
+            e.preventDefault()
+            if (!renaming) onCodelistClick()
+          }}>
+          <EditableP
+            editStyle={{background: '#f1f2f5', color: 'rgba(0, 0, 0, 0.88)'}}
+            onCancel={() => setRenaming(false)}
+            value={codelist.name ?? ''}
+            editMode={renaming}
+            onSave={handleRename}
+          />
+        </span>
+      </Dropdown>
+    </>
   )
 }
 

@@ -1,6 +1,7 @@
 import {ItemType} from 'antd/es/menu/hooks/useItems'
-import React, {useCallback, useMemo} from 'react'
+import React, {useCallback, useMemo, useState} from 'react'
 import {Codelist, Collection, Phenotype} from '../..'
+import CopyCodelistDialog from './CopyCodelistDialog'
 import {MenuInfo} from 'rc-menu/lib/interface'
 import useExport from '../useExport'
 import {useDispatch, useSelector} from 'react-redux'
@@ -29,6 +30,7 @@ const useCodelistActions = (codelist: Codelist, isReadOnly: boolean, options?: {
   const openMedicalConcepts = useSelector((state: RootState) => openCodelistIdSelector(state))
   const allowComparision = useSelector((state: RootState) => state.workspace.openCodelists.length > 0)
   const exporter = useExport()
+  const [copyToOpen, setCopyToOpen] = useState(false)
 
   const {modal} = App.useApp()
 
@@ -156,6 +158,8 @@ const useCodelistActions = (codelist: Codelist, isReadOnly: boolean, options?: {
       items.push({label: 'Duplicate Codelist', key: 'duplicate'})
       items.push({label: 'Delete Codelist', key: 'delete'})
       items.push({type: 'divider'})
+    } else {
+      items.push({label: 'Copy to ...', key: 'copy_to'})
     }
 
     items.push({label: 'Copy ID', key: 'copy_id'})
@@ -272,6 +276,9 @@ const useCodelistActions = (codelist: Codelist, isReadOnly: boolean, options?: {
         case 'duplicate':
           handleDuplicateConcept()
           break
+        case 'copy_to':
+          setCopyToOpen(true)
+          break
         case 'delete':
           handleDelete()
           break
@@ -293,7 +300,21 @@ const useCodelistActions = (codelist: Codelist, isReadOnly: boolean, options?: {
     [codelist, data, openMedicalConcepts, handleCompare],
   )
 
-  return {menuItems, handleMenuClick, updateCodelist}
+  const actionsDom = useMemo(() => {
+    return (
+      <>
+        {copyToOpen && (
+          <CopyCodelistDialog
+            codelist={codelist}
+            onClose={() => setCopyToOpen(false)}
+            onCancel={() => setCopyToOpen(false)}
+          />
+        )}
+      </>
+    )
+  }, [copyToOpen, codelist])
+
+  return {menuItems, handleMenuClick, updateCodelist, actionsDom}
 }
 
 export default useCodelistActions

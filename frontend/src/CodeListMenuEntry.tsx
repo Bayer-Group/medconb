@@ -105,9 +105,13 @@ const ConceptMenuEntry: React.FC<ConceptMenuEntryProps> = ({node, sectionKey, re
     }
   }, [conData])
 
-  const {menuItems, handleMenuClick, updateCodelist} = useCodelistActions(node.data?.node as Codelist, readonly, {
-    onRename: () => setRenaming(true),
-  })
+  const {menuItems, handleMenuClick, updateCodelist, actionsDom} = useCodelistActions(
+    node.data?.node as Codelist,
+    readonly,
+    {
+      onRename: () => setRenaming(true),
+    },
+  )
 
   const handleUpdate = async (newName: string) => {
     await updateCodelist({name: newName})
@@ -115,17 +119,20 @@ const ConceptMenuEntry: React.FC<ConceptMenuEntryProps> = ({node, sectionKey, re
   }
 
   return (
-    <MenuEntry
-      value={node.text}
-      busy={busy}
-      menuItems={menuItems}
-      onMenuClick={handleMenuClick}
-      prefix={openMedicalConcepts.includes(node.data?.id!) ? indicators[node.data?.id!].color : undefined}
-      editing={renaming}
-      onRename={handleUpdate}
-      onCancelRename={() => setRenaming(false)}
-      onClick={handleConceptClick}
-    />
+    <>
+      {actionsDom}
+      <MenuEntry
+        value={node.text}
+        busy={busy}
+        menuItems={menuItems}
+        onMenuClick={handleMenuClick}
+        prefix={openMedicalConcepts.includes(node.data?.id!) ? indicators[node.data?.id!].color : undefined}
+        editing={renaming}
+        onRename={handleUpdate}
+        onCancelRename={() => setRenaming(false)}
+        onClick={handleConceptClick}
+      />
+    </>
   )
 }
 

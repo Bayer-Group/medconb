@@ -131,7 +131,7 @@ class CloneCodelist(BaseCodelistInteractor):
         self,
         dto: gql.CloneCodelistRequestDto,
     ) -> d.Codelist:
-        codelist = self._load_codelist(dto.codelist_id)
+        codelist = self._load_codelist(dto.codelist_id, writeable=False)
         container = self._must_load_container(codelist.container)
         assert isinstance(container, (d.Collection, d.Phenotype))
         assert codelist in container
