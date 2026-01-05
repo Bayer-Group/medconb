@@ -303,7 +303,9 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({id, navigateEntity, 
                   if (navigateEntity) {
                     navigateEntity('Collection', data.collection.referenceID)
                   } else {
-                    navigate(`/collection//${data.collection.referenceID}`)
+                    const type = data.collection.itemType
+                    const collectionId = data.collection.referenceID
+                    navigate(`/collection/${type}/${collectionId}`)
                   }
                 }}
                 collectionID={data.collection.referenceID}
