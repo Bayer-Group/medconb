@@ -4,11 +4,11 @@ import {styled} from '@linaria/react'
 import {Button, Col, Dropdown, Row, Space, Spin, Switch} from 'antd'
 import {ItemType} from 'antd/lib/menu/hooks/useItems'
 import {useLiveQuery} from 'dexie-react-hooks'
-import {cloneDeep, flatten, isEmpty, keys, some, uniq, values} from 'lodash'
+import {cloneDeep, compact, difference, flatten, isEmpty, keys, some, union, uniq, values} from 'lodash'
 import {MenuInfo} from 'rc-menu/lib/interface'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
-import {Codelist, IndicatorIndex, LocalCode, LocalOntology} from '..'
+import {Codelist, CodeTreeDataSet, IndicatorIndex, LocalCode, LocalOntology} from '..'
 import ConceptIndicator from './components/ConceptIndicator'
 import MainLoader from './components/MainLoader'
 import SelectOntology from './components/SelectOntology'
@@ -35,6 +35,7 @@ import {
 import {calculateFilteredCodes} from './treeUtils'
 import {combineLatest} from './utils'
 import VirtualCodeTree, {VCodeTreeHandle} from './VirtualCodeTree'
+import useChangeSet from './useChangeSet'
 
 const MAX_CODES = 100000
 
@@ -51,7 +52,38 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
   const client = useApolloClient()
   const [chunks, setChunks] = useState(0)
   const [codesAreStale, setCodesAreStale] = useState(true)
+
   const ontologies = useLiveQuery(() => db.ontologies.toArray())
+  const ontology = (ontologies ?? []).find((o) => o.name === pane.ontology)
+
+  const codeTreeRef = useRef<VCodeTreeHandle>(null)
+  const [codelists, setMedicalConcepts] = useState<Codelist[]>([])
+  const changeSet = useChangeSet()
+
+  const visibleCodelists = useMemo(
+    () => codelists.filter((mc) => pane.visibleConcepts.includes(mc.id)),
+    [codelists, pane.visibleConcepts],
+  )
+  const visibleCodelistsCodeIds = useMemo<CodeTreeDataSet>(() => {
+    if (!visibleCodelists || !ontology) {
+      return {} as CodeTreeDataSet
+    }
+
+    return visibleCodelists.reduce((acc, mc) => {
+      const codeSet = mc.codesets.filter((cs) => cs.ontology.name == ontology.name)[0]
+
+      const transientAdded = (changeSet[mc.id] ?? [])[ontology.name]?.added ?? []
+      const transientremoved = (changeSet[mc.id] ?? [])[ontology.name]?.removed ?? []
+
+      const reducedCodeset = codeSet ? codeSet.codes.map((c) => c.id) : []
+
+      acc[String(mc.id)] = new Set(
+        difference(union(reducedCodeset, compact(transientAdded)), compact(transientremoved)).map((c) => Number(c)),
+      )
+      return acc
+    }, {} as CodeTreeDataSet)
+  }, [ontology?.name, visibleCodelists, changeSet])
+
   const codes = useLiveQuery(() => {
     if (!ontologies) return []
     let ontology = ontologies.find((o) => o.name === pane.ontology)
@@ -74,10 +106,6 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
       setCodesAreStale(false)
     })
   }, [pane.ontology, pane.filteredCodes, ontologies])
-  const ontology = (ontologies ?? []).find((o) => o.name === pane.ontology)
-
-  const codeTreeRef = useRef<VCodeTreeHandle>(null)
-  const [codelists, setMedicalConcepts] = useState<Codelist[]>([])
 
   const [searchCodes] = useLazyQuery(SEARCH_CODES)
   const [searchCodesLinear] = useLazyQuery(SEARCH_CODES_LINEAR)
@@ -373,11 +401,6 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
       .catch(console.log)
   }
 
-  const visibleCodelists = useMemo(
-    () => codelists.filter((mc) => pane.visibleConcepts.includes(mc.id)),
-    [codelists, pane.visibleConcepts],
-  )
-
   useEffect(() => {
     if (ontology && (pane.filter.code.length > 0 || (pane.filter.description ?? '').length > 3)) {
       handleSearchClick(pane.filter)
@@ -454,7 +477,8 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
             ontology={ontology}
             filters={pane.filters}
             filteredCodes={pane.filteredCodes}
-            concepts={codelists.filter((mc) => pane.visibleConcepts.includes(mc.id))}
+            codelists={visibleCodelists}
+            codelistsCodeIds={visibleCodelistsCodeIds}
             animals={animals}
           />
         )}
@@ -462,7 +486,8 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
           <VirtualCodeTree
             ontology={ontology}
             ontologyCodes={codes as LocalCode[]}
-            concepts={visibleCodelists}
+            codelists={visibleCodelists}
+            codelistsCodeIds={visibleCodelistsCodeIds}
             key={ontology.name}
             filters={pane.filters}
             search={pane.filter}

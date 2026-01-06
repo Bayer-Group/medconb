@@ -1,9 +1,9 @@
 import {styled} from '@linaria/react'
 import {Space} from 'antd'
-import {compact, difference, intersection, orderBy, range, union, values} from 'lodash'
+import {difference, intersection, range, union, values} from 'lodash'
 import {memo, useCallback, useEffect, useMemo, useState} from 'react'
 import {useDispatch} from 'react-redux'
-import {Codelist, CodeTreeData, IndicatorIndex, LocalCode, LocalOntology} from '..'
+import {Codelist, CodeTreeDataSet, IndicatorIndex, LocalCode, LocalOntology} from '..'
 import CodeCheckbox, {CodeSelectFlag} from './components/CodeCheckbox'
 import ConceptIndicator from './components/ConceptIndicator'
 import {Filter} from './FilterComponent'
@@ -12,13 +12,13 @@ import {PaneFilter, SearchResultState} from './store/workspace'
 import {areEqual, FixedSizeList as List} from 'react-window'
 import useMeasure from 'react-use-measure'
 import {doneAppLoading, startAppLoading} from './store/ui'
-import useChangeSet from './useChangeSet'
 
 type OntologyListViewProps = {
   ontology: LocalOntology
   ontologyCodes: LocalCode[]
   search: Filter
-  concepts: Codelist[]
+  codelists: Codelist[]
+  codelistsCodeIds: CodeTreeDataSet
   filters: PaneFilter
   colors: {[mcId: string]: string}
   animals: {[mcId: string]: IndicatorIndex}
@@ -36,7 +36,8 @@ const Wrapper: React.FC<OntologyListViewProps> = (props) => {
 
 const OntologyListView: React.FC<OntologyListViewProps & {height: number}> = ({
   ontology,
-  concepts,
+  codelists,
+  codelistsCodeIds,
   colors,
   animals,
   filters,
@@ -46,53 +47,37 @@ const OntologyListView: React.FC<OntologyListViewProps & {height: number}> = ({
   height,
 }) => {
   const dispatch = useDispatch()
-  const changeSet = useChangeSet()
   const [_codes, setCodes] = useState<LocalCode[]>([])
 
-  const computedValue = useMemo<CodeTreeData>(() => {
-    if (!concepts) {
-      return {} as CodeTreeData
-    }
-
-    return concepts.reduce((acc, mc) => {
-      const codeSet = mc.codesets.filter((cs) => cs.ontology.name == ontology.name)[0]
-
-      const transientAdded = (changeSet[mc.id] ?? [])[ontology.name]?.added ?? []
-      const transientremoved = (changeSet[mc.id] ?? [])[ontology.name]?.removed ?? []
-
-      const reducedCodeset = codeSet ? codeSet.codes.map((c) => c.id) : []
-
-      acc[String(mc.id)] = difference(union(reducedCodeset, compact(transientAdded)), compact(transientremoved))
-      return acc
-    }, {} as CodeTreeData)
-  }, [ontology.name, concepts, changeSet])
-
-  const codes = useMemo<Set<string>>(() => {
-    const unfilteredCodes = union(...values(computedValue)).sort()
+  const codes = useMemo<Set<number>>(() => {
+    const unfilteredCodes = union(...values(codelistsCodeIds).map((set) => Array.from(set)))
     let _filteredCodes = unfilteredCodes
 
     if (filteredCodes) {
-      // TODO: can the ids be handled as numbers?
-      const filteredCodeIds = filteredCodes.map((c) => c.id.toString())
-      _filteredCodes = _filteredCodes.filter((code) => filteredCodeIds.includes(code))
+      const filteredCodeIds_ = filteredCodes.map((c) => c.id)
+      _filteredCodes = _filteredCodes.sort().filter((code) => filteredCodeIds_.includes(code))
     }
 
     if (filters.showOnlyOverlapping) {
-      _filteredCodes = intersection(...values(computedValue))
+      _filteredCodes = intersection(...values(codelistsCodeIds).map((set) => Array.from(set)))
     }
 
     if (filters.showDiffering) {
-      const valuesV = values(computedValue)
-      _filteredCodes = difference(union(...valuesV), intersection(...valuesV))
+      const valuesV = values(codelistsCodeIds)
+      _filteredCodes = difference(
+        union(...valuesV.map((set) => Array.from(set))),
+        intersection(...valuesV.map((set) => Array.from(set))),
+      )
     }
 
-    return new Set(orderBy(_filteredCodes, (code) => Number(code)))
-  }, [computedValue, concepts, filteredCodes, filters])
+    // Set is not ordered but internally it will keep the order of insertion
+    return new Set(_filteredCodes.sort())
+  }, [codelistsCodeIds, codelists, filteredCodes, filters])
 
   useEffect(() => {
     if ((ontologyCodes ?? []).length > 0) {
       dispatch(startAppLoading())
-      const __codes = ontologyCodes.filter(({id}) => codes.has(`${id}`))
+      const __codes = ontologyCodes.filter(({id}) => codes.has(id))
       setCodes(__codes)
       dispatch(doneAppLoading())
     }
@@ -100,17 +85,13 @@ const OntologyListView: React.FC<OntologyListViewProps & {height: number}> = ({
 
   const toggleCode = useCallback(
     (code: LocalCode, codelistId: string, checked: boolean, flag: CodeSelectFlag) => {
-      let codes = [`${code.id}`]
-      if (flag === CodeSelectFlag.ALL)
-        codes = union(
-          codes,
-          range(code.id, code.last_descendant_id).map((c) => `${c}`),
-        )
+      let codes = [code.id]
+      if (flag === CodeSelectFlag.ALL) codes = union(codes, range(code.id, code.last_descendant_id))
       if (checked) {
         dispatch(
           addCodes({
             ontology: ontology.name,
-            codes: codes.filter((c) => !computedValue[codelistId].includes(c)),
+            codes: codes.filter((c) => !codelistsCodeIds[codelistId].has(c)).map(String),
             mcId: codelistId,
           }),
         )
@@ -118,13 +99,13 @@ const OntologyListView: React.FC<OntologyListViewProps & {height: number}> = ({
         dispatch(
           removeCodes({
             ontology: ontology.name,
-            codes: codes.filter((c) => computedValue[codelistId].includes(c)),
+            codes: codes.filter((c) => codelistsCodeIds[codelistId].has(c)).map(String),
             mcId: codelistId,
           }),
         )
       }
     },
-    [ontology.name, computedValue],
+    [ontology.name, codelistsCodeIds],
   )
   return (
     <List height={height} itemCount={_codes.length} itemSize={26.85} width={'100%'}>
@@ -135,12 +116,12 @@ const OntologyListView: React.FC<OntologyListViewProps & {height: number}> = ({
             key={code.id}
             code={code}
             search={search}
-            concepts={concepts}
+            codelists={codelists}
             toggleCode={toggleCode}
             colors={colors}
             animals={animals}
             style={style}
-            isChecked={(concept, code) => computedValue[concept].includes(code)}
+            isChecked={(concept, code) => codelistsCodeIds[concept].has(code)}
           />
         )
       }}
@@ -150,18 +131,18 @@ const OntologyListView: React.FC<OntologyListViewProps & {height: number}> = ({
 
 type CodeProps = {
   codeId: number
-  concepts: Codelist[]
+  codelists: Codelist[]
   colors: {[mcId: string]: string}
   animals: {[mcId: string]: IndicatorIndex}
   search: Filter
   toggleCode: (code: LocalCode, codelistId: string, checked: boolean, flag: CodeSelectFlag) => void
-  isChecked: (concept: string, code: string) => boolean
+  isChecked: (concept: string, code: number) => boolean
 }
 
 type ListCodeProps = Omit<CodeProps, 'codeId'> & {code: LocalCode}
 
 export const ListCode: React.FC<ListCodeProps & {style: any}> = memo(
-  ({code, concepts, search, toggleCode, colors, animals, isChecked, style}) => {
+  ({code, codelists, search, toggleCode, colors, animals, isChecked, style}) => {
     // const {isIntersecting, ref} = useIntersectionObserver({
     //   threshold: [0, 0.5],
     // })
@@ -188,7 +169,7 @@ export const ListCode: React.FC<ListCodeProps & {style: any}> = memo(
             minWidth: 0,
             flex: 1,
           }}>
-          {concepts.map((c, i) => (
+          {codelists.map((c, i) => (
             <CodeCheckbox
               codelist={c}
               hasChildren={code.children_ids.length > 0}
@@ -205,7 +186,7 @@ export const ListCode: React.FC<ListCodeProps & {style: any}> = memo(
                 </Space>
               }
               key={c.id}
-              checked={isChecked(c.id, `${code.id}`)}
+              checked={isChecked(c.id, code.id)}
             />
           ))}
 

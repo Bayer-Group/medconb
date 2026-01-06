@@ -3,7 +3,7 @@ import {CaretDownOutlined, CaretRightOutlined} from '@ant-design/icons'
 import {styled} from '@linaria/react'
 import {Space} from 'antd'
 import cx from 'classnames'
-import {compact, difference, flatten, range, union, uniq, values} from 'lodash'
+import {flatten, range, union, uniq, values} from 'lodash'
 import {
   CSSProperties,
   memo,
@@ -28,7 +28,6 @@ import {addCodes, removeCodes} from './store/changes'
 import {doneAppLoading, startAppLoading, toggleOntologyNode} from './store/ui'
 import {PaneFilter, SearchResultState} from './store/workspace'
 import {calculateFilteredCodes} from './treeUtils'
-import useChangeSet from './useChangeSet'
 
 const MAX_CODES = 100000
 
@@ -37,7 +36,8 @@ export type VCodeTreeHandle = {
 }
 
 type VirtualCodeTreeProps = {
-  concepts: Codelist[]
+  codelists: Codelist[]
+  codelistsCodeIds: CodeTreeDataSet
   ontologyCodes: LocalCode[]
   search: Filter
   filters: PaneFilter
@@ -59,7 +59,8 @@ const Wrapper: React.FC<VirtualCodeTreeProps> = (props) => {
 
 const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
   ontologyCodes,
-  concepts,
+  codelists,
+  codelistsCodeIds,
   filters,
   ontology,
   search,
@@ -69,32 +70,12 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
   height,
   handle,
 }) => {
-  const changeSet = useChangeSet()
   const openNodes = useSelector((state: RootState) => state.ui.ontologyTreeOpenState)
   const dispatch = useDispatch()
   const listRef = useRef<VariableSizeList<TreeNode>>(null)
   const [codes, setCodes] = useState<TreeNode[]>([])
   const [isFiltering, setIsFiltering] = useState(true)
   const [intermediates, setIntermediates] = useState<number[]>([])
-  const computedValue = useMemo<CodeTreeDataSet>(() => {
-    if (!concepts) {
-      return {} as CodeTreeDataSet
-    }
-
-    return concepts.reduce((acc, mc) => {
-      const codeSet = mc.codesets.filter((cs) => cs.ontology.name == ontology.name)[0]
-
-      const transientAdded = (changeSet[mc.id] ?? [])[ontology.name]?.added ?? []
-      const transientremoved = (changeSet[mc.id] ?? [])[ontology.name]?.removed ?? []
-
-      const reducedCodeset = codeSet ? codeSet.codes.map((c) => c.id) : []
-
-      acc[String(mc.id)] = new Set(
-        difference(union(reducedCodeset, compact(transientAdded)), compact(transientremoved)).map((c) => Number(c)),
-      )
-      return acc
-    }, {} as CodeTreeDataSet)
-  }, [ontology.name, concepts, changeSet])
 
   useImperativeHandle(handle, () => ({
     getAllInclusiveCodes: () => intermediates,
@@ -107,10 +88,10 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
     }
 
     setTimeout(() => {
-      const _codes = values(computedValue).reduce((a, c) => a.union(c), new Set())
+      const _codes = values(codelistsCodeIds).reduce((a, c) => a.union(c), new Set())
       const _int = uniq(flatten(ontologyCodes.filter(({id}) => _codes.has(id)).map(({path}) => path.slice(0, -1))))
       const filtered = filterOntology(ontologyCodes, {
-        value: computedValue,
+        value: codelistsCodeIds,
         openNodes: (openNodes[ontology.name] ?? []).map((n) => Number(n)),
         filters,
         searchResults,
@@ -132,7 +113,7 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
       filterCodes(true)
     }
     setIsFiltering(false)
-  }, [ontology.name, filters, searchResults, ontologyCodes, computedValue, openNodes])
+  }, [ontology.name, filters, searchResults, ontologyCodes, codelistsCodeIds, openNodes])
 
   const toggleCode = useCallback(
     (code: LocalCode, codelistId: string, checked: boolean, flag: CodeSelectFlag) => {
@@ -164,7 +145,7 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
         dispatch(
           addCodes({
             ontology: ontology.name,
-            codes: addedCodes.filter((c) => !computedValue[codelistId].has(c)).map((c) => `${c}`),
+            codes: addedCodes.filter((c) => !codelistsCodeIds[codelistId].has(c)).map((c) => `${c}`),
             mcId: codelistId,
           }),
         )
@@ -172,13 +153,13 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
         dispatch(
           removeCodes({
             ontology: ontology.name,
-            codes: addedCodes.filter((c) => computedValue[codelistId].has(c)).map((c) => `${c}`),
+            codes: addedCodes.filter((c) => codelistsCodeIds[codelistId].has(c)).map((c) => `${c}`),
             mcId: codelistId,
           }),
         )
       }
     },
-    [searchResults, computedValue],
+    [searchResults, codelistsCodeIds],
   )
 
   const getItemSize = (index: number) => {
@@ -230,14 +211,14 @@ const VirtualCodeTree: React.FC<VirtualCodeTreeProps & {height: number}> = ({
               code={code}
               nextCode={codes.at(index + 1)}
               search={search}
-              concepts={concepts}
+              codelists={codelists}
               toggleCode={toggleCode}
               colors={colors}
               animals={animals}
               open={(openNodes[ontology.name] ?? []).includes(code.id)}
               style={style}
-              isChecked={(concept, code) => computedValue[concept].has(code)}
-              isIntermediate={(concept, code) => computedValue[concept].has(code)}
+              isChecked={(concept, code) => codelistsCodeIds[concept].has(code)}
+              isIntermediate={(concept, code) => codelistsCodeIds[concept].has(code)}
             />
           )
         }}
@@ -250,7 +231,7 @@ export default Wrapper
 
 type CodeProps = {
   codeId: number
-  concepts: Codelist[]
+  codelists: Codelist[]
   colors: {[mcId: string]: string}
   animals: {[mcId: string]: IndicatorIndex}
   search: Filter
@@ -263,7 +244,7 @@ type CodeProps = {
 type ListCodeProps = Omit<CodeProps, 'codeId'> & {code: TreeNode; nextCode?: TreeNode}
 
 export const ListCode: React.FC<ListCodeProps & {style: CSSProperties}> = memo(
-  ({code, nextCode, concepts, search, toggleCode, colors, animals, isChecked, style, open}) => {
+  ({code, nextCode, codelists, search, toggleCode, colors, animals, isChecked, style, open}) => {
     const dispatch = useDispatch()
     const handleToggle = () => {
       if (code.children_ids.length > 0)
@@ -366,7 +347,7 @@ export const ListCode: React.FC<ListCodeProps & {style: CSSProperties}> = memo(
               minWidth: 0,
               flex: 1,
             }}>
-            {concepts.map((c, i) => (
+            {codelists.map((c, i) => (
               <CodeCheckbox
                 codelist={c}
                 hasChildren={code.children_ids.length > 0}
