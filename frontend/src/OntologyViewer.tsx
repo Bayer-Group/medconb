@@ -52,9 +52,11 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
   const client = useApolloClient()
   const [chunks, setChunks] = useState(0)
   const [codesAreStale, setCodesAreStale] = useState(true)
+  const lastCodeIds = useRef<Set<number>>(new Set())
+  const codes_ = useRef<LocalCode[]>([])
 
   const ontologies = useLiveQuery(() => db.ontologies.toArray())
-  const ontology = (ontologies ?? []).find((o) => o.name === pane.ontology)
+  const ontology = useMemo(() => (ontologies ?? []).find((o) => o.name === pane.ontology), [ontologies, pane.ontology])
 
   const codeTreeRef = useRef<VCodeTreeHandle>(null)
   const [codelists, setMedicalConcepts] = useState<Codelist[]>([])
@@ -82,30 +84,52 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
       )
       return acc
     }, {} as CodeTreeDataSet)
-  }, [ontology?.name, visibleCodelists, changeSet])
+  }, [ontology, visibleCodelists, changeSet])
+
+  // Query the codes for the ontology
+  // For linear ontologies we can not load all codes at once as there
+  // are too many; so we limit the query based on the filters.
+  // To avoid re-querying too often (is expensive) we keep track of the
+  // last loaded codes (codes_) and only re-query when the filter
+  // results require it (subset of loaded codes).
+  const showOnlySelectedCodes = pane.filters.showOnlySelected || pane.viewType === 'list'
 
   const codes = useLiveQuery(() => {
-    if (!ontologies) return []
-    let ontology = ontologies.find((o) => o.name === pane.ontology)
-    if (!ontology) throw new Error('Ontology not found')
-
-    console.time(`queryOntologyCodes`)
-    let query = db.codes.where({ontology_id: pane.ontology})
+    if (!ontology) return []
+    let query = db.codes.where({ontology_id: ontology.name})
 
     if (ontology.is_linear) {
-      if (pane.filteredCodes && pane.filteredCodes.length > 0) {
+      if (showOnlySelectedCodes) {
+        const selectedCodes = values(visibleCodelistsCodeIds).reduce((a, c) => a.union(c), new Set())
+        if (selectedCodes.isSubsetOf(new Set(codes_.current.map((c) => c.id)))) {
+          return codes_.current
+        }
+        query = query.filter((c) => selectedCodes.has(c.id))
+      } else if (pane.filteredCodes !== null) {
         const filteredIds = new Set(pane.filteredCodes.map((c) => c.id))
+        if (filteredIds.isSubsetOf(new Set(codes_.current.map((c) => c.id)))) {
+          return codes_.current
+        }
         query = query.filter((c) => filteredIds.has(c.id))
       } else {
         query = query.limit(MAX_CODES)
       }
     }
 
-    return query.toArray().finally(() => {
-      console.timeEnd(`queryOntologyCodes`)
-      setCodesAreStale(false)
-    })
-  }, [pane.ontology, pane.filteredCodes, ontologies])
+    setCodesAreStale(true)
+    console.time(`queryOntologyCodes`)
+    return query
+      .toArray()
+      .then((codes) => {
+        lastCodeIds.current = new Set(codes.map((c) => c.id))
+        codes_.current = codes
+        return codes_.current
+      })
+      .finally(() => {
+        console.timeEnd(`queryOntologyCodes`)
+        setCodesAreStale(false)
+      })
+  }, [ontology, showOnlySelectedCodes, visibleCodelistsCodeIds, pane.filteredCodes])
 
   const [searchCodes] = useLazyQuery(SEARCH_CODES)
   const [searchCodesLinear] = useLazyQuery(SEARCH_CODES_LINEAR)
