@@ -41,7 +41,7 @@ class CreateCodelist(BaseCodelistInteractor):
     """
 
     def __call__(self, dto: gql.CreateCodelistRequestDto) -> d.Codelist:
-        (ref_ctr, ref_cl) = self._identify_ref(
+        ref_ctr, ref_cl = self._identify_ref(
             dto.position, item_type=d.ItemType.Codelist
         )
         ref_cl = cast(d.Codelist, ref_cl)
@@ -189,7 +189,7 @@ class MoveCodelist(BaseCodelistInteractor):
         """
         codelist = self._load_codelist(dto.codelist_id)
         container = self._must_load_container(codelist.container)
-        (ref_ctr, ref_cl) = self._identify_ref(
+        ref_ctr, ref_cl = self._identify_ref(
             dto.position, default_container=container, item_type=d.ItemType.Codelist
         )
 

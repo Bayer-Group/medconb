@@ -40,7 +40,7 @@ class PhenotypeInteractor(BaseInteractor):
 
 class CreatePhenotype(PhenotypeInteractor):
     def __call__(self, dto: gql.CreatePhenotypeRequestDto) -> d.Phenotype:
-        (ref_ctr, ref_pht) = self._identify_ref(
+        ref_ctr, ref_pht = self._identify_ref(
             dto.position, item_type=d.ItemType.Phenotype
         )
         ref_pht = cast(d.Phenotype, ref_pht)
@@ -118,7 +118,7 @@ class UpdatePhenotype(PhenotypeInteractor):  # noqa: radon complexity
 
         if dto.position is not None:
             container = self._must_load_container(phenotype.container)
-            (ref_ctr, ref_pht) = self._identify_ref(
+            ref_ctr, ref_pht = self._identify_ref(
                 dto.position,
                 default_container=container,
                 item_type=d.ItemType.Phenotype,

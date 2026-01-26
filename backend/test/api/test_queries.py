@@ -16,8 +16,7 @@ def test_self(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 self {
                     id
                     workspace {
@@ -42,8 +41,7 @@ def test_self(client: "TestClient"):
                         }
                     }
                 }
-            }"""
-        },
+            }"""},
     )
 
     res = json.loads(response.text)["data"]["self"]
@@ -77,16 +75,14 @@ def test_ontology(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 ontology(name: "ICD-10-CM") {
                     name
                     rootCodes(pageSize: 100) {
                         id
                     }
                 }
-            }"""
-        },
+            }"""},
     )
     res = json.loads(response.text)
     assert "data" in res
@@ -100,8 +96,7 @@ def test_code(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 code(id: 23345) {
                     id
                     code
@@ -112,8 +107,7 @@ def test_code(client: "TestClient"):
                     numberOfChildren
                     lastDescendantId
                 }
-            }"""
-        },
+            }"""},
     )
     assertDictEqual(
         json.loads(response.text),
@@ -127,14 +121,12 @@ def test_codes(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 codes(ids: [-1, 23341, 23344, 23345]) {
                     id
                     code
                 }
-            }"""
-        },
+            }"""},
     )
 
     expected_codes = {("23341", "A04.7"), ("23344", "A04.8"), ("23345", "A04.9")}
@@ -147,14 +139,12 @@ def test_search_codes(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 searchCodes(
                     ontologyID: "ICD-10-CM",
                     query:{code: {value: "Z.*", type: POSIX}, description:"alcohol abu"}
                 ) { id }
-            }"""
-        },
+            }"""},
     )
 
     expected_ids = {"118404", "118405", "118563"}
@@ -167,8 +157,7 @@ def test_collection(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 collection(id: "00000000-0000-0000-0002-000000000004") {
                     id
                     name
@@ -196,8 +185,7 @@ def test_collection(client: "TestClient"):
                     }
                     sharedWith
                 }
-            }"""
-        },
+            }"""},
     )
 
     res = json.loads(response.text)["data"]["collection"]
@@ -240,8 +228,7 @@ def test_phenotype(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 phenotype(
                     phenotypeID: "00000000-0000-0000-0005-000000000001"
                 ) {
@@ -263,8 +250,7 @@ def test_phenotype(client: "TestClient"):
                         visibility
                     }
                 }
-            }"""
-        },
+            }"""},
     )
 
     res = json.loads(response.text)["data"]["phenotype"]
@@ -291,8 +277,7 @@ def test_properties(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 properties {
                     id
                     name
@@ -301,8 +286,7 @@ def test_properties(client: "TestClient"):
                     required
                     options
                 }
-            }"""
-        },
+            }"""},
     )
 
     res = json.loads(response.text)["data"]["properties"]
@@ -317,8 +301,7 @@ def test_phenotype_properties(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 properties(clazz: Phenotype) {
                     id
                     name
@@ -327,8 +310,7 @@ def test_phenotype_properties(client: "TestClient"):
                     required
                     options
                 }
-            }"""
-        },
+            }"""},
     )
 
     res = json.loads(response.text)["data"]["properties"]
@@ -339,8 +321,7 @@ def test_codelist(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 codelist(
                     codelistID: "00000000-0000-0000-0004-000000000002"
                 ) {
@@ -354,8 +335,7 @@ def test_codelist(client: "TestClient"):
                         type
                     }
                 }
-            }"""
-        },
+            }"""},
     )
 
     res = json.loads(response.text)["data"]["codelist"]
@@ -375,15 +355,13 @@ def test_users(client: "TestClient"):
     response = client.post(
         url="/graphql/",
         headers={"Authorization": "Bearer FOOBAR"},
-        json={
-            "query": """query {
+        json={"query": """query {
                 users {
                     id
                     name
                     externalId
                 }
-            }"""
-        },
+            }"""},
     )
 
     res = json.loads(response.text)["data"]["users"]

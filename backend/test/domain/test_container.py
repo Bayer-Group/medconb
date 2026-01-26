@@ -26,8 +26,7 @@ class TestAddOrMoveItem:
         )
         codelists[9999] = new_codelist
 
-        want = textwrap.dedent(
-            """\
+        want = textwrap.dedent("""\
         Stork (id=1, #=2)
         - 11 (name=right)
         - 12 (name=heart failure)
@@ -39,8 +38,7 @@ class TestAddOrMoveItem:
         - 31 (name=bleed)
         Temp (id=4, #=1)
         - 41 (name=covid)
-        """
-        )
+        """)
 
         d.add_or_move_item(
             container=None,
@@ -71,8 +69,7 @@ class TestAddOrMoveItem:
         )
         codelists[9999] = new_codelist
 
-        want = textwrap.dedent(
-            """\
+        want = textwrap.dedent("""\
         Stork (id=1, #=2)
         - 11 (name=right)
         - 12 (name=heart failure)
@@ -84,8 +81,7 @@ class TestAddOrMoveItem:
         - 31 (name=bleed)
         Temp (id=4, #=1)
         - 41 (name=covid)
-        """
-        )
+        """)
 
         d.add_or_move_item(
             container=None,
@@ -106,8 +102,7 @@ class TestAddOrMoveItem:
     ):
         user, collections, codelists = test_data
 
-        want = textwrap.dedent(
-            """\
+        want = textwrap.dedent("""\
         Stork (id=1, #=2)
         - 11 (name=right)
         - 12 (name=heart failure)
@@ -118,8 +113,7 @@ class TestAddOrMoveItem:
         ECA (copy) (id=3, #=0)
         Temp (id=4, #=1)
         - 41 (name=covid)
-        """
-        )
+        """)
 
         d.add_or_move_item(
             container=collections[3],
