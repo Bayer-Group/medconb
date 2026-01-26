@@ -97,6 +97,7 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
   const codes = useLiveQuery(() => {
     if (!ontology) return []
     let query = db.codes.where({ontology_id: ontology.name})
+    let resultPromise: Promise<(LocalCode | undefined)[]> | null = null
 
     if (ontology.is_linear) {
       if (showOnlySelectedCodes) {
@@ -104,13 +105,13 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
         if (selectedCodes.isSubsetOf(new Set(codes_.current.map((c) => c.id)))) {
           return codes_.current
         }
-        query = query.filter((c) => selectedCodes.has(c.id))
+        resultPromise = db.codes.bulkGet(Array.from(selectedCodes))
       } else if (pane.filteredCodes !== null) {
         const filteredIds = new Set(pane.filteredCodes.map((c) => c.id))
         if (filteredIds.isSubsetOf(new Set(codes_.current.map((c) => c.id)))) {
           return codes_.current
         }
-        query = query.filter((c) => filteredIds.has(c.id))
+        resultPromise = db.codes.bulkGet(Array.from(filteredIds))
       } else {
         query = query.limit(MAX_CODES)
       }
@@ -118,11 +119,14 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
 
     setCodesAreStale(true)
     console.time(`queryOntologyCodes`)
-    return query
-      .toArray()
+    return (resultPromise ? resultPromise : query.toArray())
       .then((codes) => {
-        lastCodeIds.current = new Set(codes.map((c) => c.id))
-        codes_.current = codes
+        codes_.current = codes.filter((c) => c !== undefined)
+        const ids = new Set<number>()
+        for (let l = codes_.current.length, i = 0; i < l; i++) {
+          ids.add(codes_.current[i].id)
+        }
+        lastCodeIds.current = ids
         return codes_.current
       })
       .finally(() => {
