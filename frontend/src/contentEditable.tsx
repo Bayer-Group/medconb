@@ -71,13 +71,20 @@ const contentEditable = <P extends object>(Component: React.ComponentType<P>): R
     }, [ref.current])
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
-      debouncedSave()
+      // saving on every keypress causes reloading of the page and
+      // thus exiting edit mode. So for now only save on Enter or when
+      // clicking outside the element. We can consider saving on every
+      // keypress again in the future if we can find a way to prevent
+      // the page reload.
+      // debouncedSave()
+
       // if (ref.current) {
       //   if (e.key === 'Escape') {
       //     handleCancel()
       //   }
       if (e.key === 'Enter') {
         e.preventDefault()
+        debouncedSave()
         debouncedSave.flush()
         if (onSave && !(readOnly || editableDefault)) {
           setEditing(false)
@@ -92,7 +99,7 @@ const contentEditable = <P extends object>(Component: React.ComponentType<P>): R
           return
         }
 
-        // handleCancel()
+        debouncedSave()
         debouncedSave.flush()
         if (onSave && !(readOnly || editableDefault)) {
           setEditing(false)
@@ -153,7 +160,6 @@ const contentEditable = <P extends object>(Component: React.ComponentType<P>): R
         pendingSingleClickEvent.current = false
       } else if (timer.current !== null) {
         // double click
-        console.log('doubleclick')
         e.stopPropagation()
         clearTimeout(timer.current)
         timer.current = null
@@ -162,7 +168,7 @@ const contentEditable = <P extends object>(Component: React.ComponentType<P>): R
         }
       } else {
         e.stopPropagation()
-        console.log('singleclick')
+        // single click
         // @ts-ignore
         const clonedNativeEvent = new MouseEvent('click', e.nativeEvent)
         timer.current = setTimeout(() => {

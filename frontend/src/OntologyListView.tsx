@@ -76,6 +76,7 @@ const OntologyListView: React.FC<OntologyListViewProps & {height: number}> = ({
 
   useEffect(() => {
     if ((ontologyCodes ?? []).length > 0) {
+      console.log('startAppLoading - OntologyListView useEffect')
       dispatch(startAppLoading())
       const __codes = ontologyCodes.filter(({id}) => codes.has(id))
       setCodes(__codes)

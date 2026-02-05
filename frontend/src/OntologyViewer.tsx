@@ -66,6 +66,7 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
     () => codelists.filter((mc) => pane.visibleConcepts.includes(mc.id)),
     [codelists, pane.visibleConcepts],
   )
+
   const visibleCodelistsCodeIds = useMemo<CodeTreeDataSet>(() => {
     if (!visibleCodelists || !ontology) {
       return {} as CodeTreeDataSet
