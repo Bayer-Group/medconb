@@ -35,7 +35,7 @@ import {
 import {calculateFilteredCodes} from './treeUtils'
 import {combineLatest} from './utils'
 import VirtualCodeTree, {VCodeTreeHandle} from './VirtualCodeTree'
-import {addCodes} from './store/changes'
+import {addCodes, removeCodes} from './store/changes'
 import useChangeSet from './useChangeSet'
 import InlineHelp from './InlineHelp'
 
@@ -262,6 +262,28 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
           }
           break
         }
+        case 'remove_all': {
+          if (codelists.length === 1 && ontology && ontology.is_linear && codes) {
+            const codelist = codelists[0]
+            const existingCodeIds = visibleCodelistsCodeIds[String(codelist.id)] ?? new Set<number>()
+            const visibleCodes = (
+              pane.filteredCodes !== null
+                ? pane.filteredCodes.map((c) => c.id)
+                : (codes as LocalCode[]).map((c) => c.id)
+            ).filter((id) => existingCodeIds.has(id))
+
+            if (visibleCodes.length > 0) {
+              dispatch(
+                removeCodes({
+                  ontology: ontology.name,
+                  mcId: String(codelist.id),
+                  codes: visibleCodes.map((c) => `${c}`),
+                }),
+              )
+            }
+          }
+          break
+        }
 
         case 'collapse_all':
           dispatch(
@@ -366,6 +388,16 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
           </>
         ),
         key: 'add_all',
+        disabled: codelists.length !== 1 || pane.viewType === 'list' || !ontology?.is_linear,
+      },
+      {
+        label: (
+          <>
+            Remove all visible
+            <InlineHelp content={'You must have a single concept active and use a linear ontology.'} />
+          </>
+        ),
+        key: 'remove_all',
         disabled: codelists.length !== 1 || pane.viewType === 'list' || !ontology?.is_linear,
       },
     ] as ItemType[]
