@@ -1,0 +1,963 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>Backend - Medical Concept Builder</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+   <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }
+    .gscrollbar-fixer { padding-right: 15px; }
+    .gdesc-inner { font-size: 0.75rem; }
+    body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+    body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="light-green" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#backend-architecture-documentation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Medical Concept Builder" class="md-header__button md-logo" aria-label="Medical Concept Builder" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Medical Concept Builder
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Backend
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Medical Concept Builder" class="md-nav__button md-logo" aria-label="Medical Concept Builder" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Medical Concept Builder
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Backend
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Backend
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Stack
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#request-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Request Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Interface
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domain-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domain Model
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domain Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Entities
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Concepts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#graphql-layer-and-use-case-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      GraphQL Layer and Use Case Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GraphQL Layer and Use Case Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Overview
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolution-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resolution Flow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#persistence-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Persistence Layer
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Stack
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#request-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Request Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Interface
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domain-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domain Model
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domain Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Entities
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Concepts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#graphql-layer-and-use-case-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      GraphQL Layer and Use Case Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GraphQL Layer and Use Case Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Overview
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolution-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resolution Flow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#persistence-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Persistence Layer
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="backend-architecture-documentation">Backend Architecture Documentation</h1>
+<h2 id="overview">Overview</h2>
+<p>This documentation provides an overview of the backend architecture, focusing on the core concepts, technical implementation, and how different components interact. It is intended for developers working on or with the backend system.</p>
+<p>The backend is built as a GraphQL API server using Python, following clean architecture principles with clear separation of concerns. The system employs a layered architecture that cleanly separates the API interface, domain logic, and persistence concerns, making it maintainable and testable.</p>
+<h2 id="project-structure">Project Structure</h2>
+<p>The main application code is organized in the following structure:</p>
+<div class="highlight"><pre><span></span><code>backend/
+├── medconb/            # Main application package
+│   ├── domain/         # Domain models and business logic
+│   ├── graphql/        # GraphQL schema implementation
+│   ├── interactors/    # Use case implementations
+│   ├── persistence/    # Data persistence layer
+│   ├── server.py       # Server configuration and setup
+│   ├── middleware.py   # Request middleware
+│   └── types.py        # Common type definitions
+├── schema.graphql      # GraphQL schema definition
+</code></pre></div>
+<h2 id="technical-stack">Technical Stack</h2>
+<ul>
+<li><strong>Web Framework</strong>: Starlette-based GraphQL server</li>
+<li><strong>Middleware</strong>:<ul>
+<li>Database session management</li>
+<li>Authentication</li>
+<li>Request/response handling</li>
+</ul>
+</li>
+<li><strong>Authentication</strong>:<ul>
+<li>Azure AD for production</li>
+<li>Development authentication for testing</li>
+<li>Token-based authentication</li>
+</ul>
+</li>
+<li><strong>Data Access</strong>:<ul>
+<li>SQLAlchemy for database operations</li>
+<li>Redis for caching</li>
+</ul>
+</li>
+<li><strong>API Layer</strong>:<ul>
+<li>GraphQL with Ariadne</li>
+<li>Custom type system</li>
+<li>Interactor pattern for business logic</li>
+</ul>
+</li>
+</ul>
+<h2 id="request-flow">Request Flow</h2>
+<p><a class="glightbox" href="../res/Architecture%20-%20Request%20Flow.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="Request Flow" src="../res/Architecture%20-%20Request%20Flow.png" /></a></p>
+<p>The diagram above shows how requests flow through the system, from the GraphQL API through the various layers to the persistence layer and back.</p>
+<h2 id="api-interface">API Interface</h2>
+<p>The application exposes a GraphQL API that provides:</p>
+<ol>
+<li>
+<p><strong>Queries</strong>:</p>
+<ul>
+<li>User-related queries (self, users)</li>
+<li>Medical coding system ontology queries</li>
+<li>Code and codelist management</li>
+<li>Collection management</li>
+<li>Search functionality for codes and entities</li>
+<li>Property management</li>
+</ul>
+</li>
+<li>
+<p><strong>Mutations</strong>:</p>
+<ul>
+<li>Collection CRUD operations</li>
+<li>Phenotype management</li>
+<li>Codelist operations</li>
+<li>Change management (commits, transient changes)</li>
+<li>User profile updates</li>
+</ul>
+</li>
+</ol>
+<h2 id="domain-model">Domain Model</h2>
+<h3 id="core-entities">Core Entities</h3>
+<ol>
+<li>
+<p><strong>Containers</strong></p>
+<ul>
+<li>Organizational structures specifically designed to group and structure Phenotypes and Codelists</li>
+<li>Support hierarchical organization</li>
+<li>Can be shared between users</li>
+<li>Types: Phenotype Collections and Codelist Collections</li>
+</ul>
+</li>
+<li>
+<p><strong>Users</strong></p>
+<ul>
+<li>Represent individuals using the system</li>
+<li>Have a unique identity and associated workspace</li>
+<li>Can own and share collections</li>
+<li>Track user-specific preferences and progress</li>
+</ul>
+</li>
+<li>
+<p><strong>Workspaces</strong></p>
+<ul>
+<li>Personal environments for organizing collections</li>
+<li>Each user has exactly one workspace</li>
+<li>Collections can be:<ul>
+<li>Ordered according to user preference</li>
+<li>Shared with other users</li>
+<li>Personal (private to the user)</li>
+</ul>
+</li>
+<li>Primary organizational unit for accessing collections</li>
+</ul>
+</li>
+<li>
+<p><strong>Medical Coding Systems (Ontologies)</strong></p>
+<ul>
+<li>Standardized medical terminology and coding systems</li>
+<li>Provide the vocabulary and codes for medical concepts</li>
+<li>Each ontology has a unique identifier and contains multiple codes</li>
+</ul>
+</li>
+<li>
+<p><strong>Codelists</strong></p>
+<ul>
+<li>Groups of related medical codes from coding systems</li>
+<li>Version-controlled through commits</li>
+<li>Components:<ul>
+<li><strong>Codesets</strong>: Sets of codes from specific medical coding systems that are part of a codelist version</li>
+<li><strong>Changesets</strong>: Track additions and removals of codes</li>
+<li><strong>Commits</strong>: Record changes with metadata (author, timestamp, message)</li>
+</ul>
+</li>
+<li>Support transient (uncommitted) changes</li>
+<li>Track derivation history (references to original codelists when copied)</li>
+</ul>
+</li>
+<li>
+<p><strong>Phenotypes</strong></p>
+<ul>
+<li>Medical condition descriptions</li>
+<li>Can be organized in collections</li>
+<li>Have configurable properties</li>
+<li>Include operational descriptions that reference one or more codelists</li>
+<li>Codelists in the operational description define the concrete medical codes that represent the phenotype</li>
+</ul>
+</li>
+<li>
+<p><strong>Properties</strong></p>
+<ul>
+<li>Configurable attributes that can be attached to collections and phenotypes</li>
+<li>Types: Text, Number, Enum, Time, User</li>
+<li>Can be required or read-only</li>
+<li>Support both system-defined and custom properties</li>
+</ul>
+</li>
+</ol>
+<h3 id="key-concepts">Key Concepts</h3>
+<ol>
+<li>
+<p><strong>Version Control</strong></p>
+<ul>
+<li>Codelists are version-controlled through commits</li>
+<li>Changes are tracked as additions and removals of codes</li>
+<li>Each commit includes author information and timestamp</li>
+<li>Support for transient changes before committing</li>
+</ul>
+</li>
+<li>
+<p><strong>Property System</strong></p>
+<ul>
+<li>Flexible property system for both collections and phenotypes</li>
+<li>Support for custom properties</li>
+<li>Automatic tracking of creation and modification metadata</li>
+<li>Type validation and constraints</li>
+</ul>
+</li>
+<li>
+<p><strong>Hierarchical Organization</strong></p>
+<ul>
+<li>Collections provide hierarchical structure</li>
+<li>Support for nested organization of phenotypes and codelists</li>
+<li>Shared collections for collaboration</li>
+</ul>
+</li>
+</ol>
+<h2 id="graphql-layer-and-use-case-implementation">GraphQL Layer and Use Case Implementation</h2>
+<h3 id="architecture-overview">Architecture Overview</h3>
+<p>The GraphQL layer connects to the application's use cases through a pattern that separates the GraphQL resolvers from the business logic implementation. This separation is achieved through:</p>
+<ol>
+<li>
+<p><strong>Interactors</strong>: Classes that implement specific use cases (e.g., CreateCollection, UpdatePhenotype)</p>
+<ul>
+<li>Handle business logic</li>
+<li>Operate on the domain model</li>
+<li>Independent of the GraphQL layer</li>
+<li>Can include input validation and error handling</li>
+</ul>
+</li>
+<li>
+<p><strong>InteractorResolver</strong>: A bridge between GraphQL and use cases</p>
+<ul>
+<li>Manages the lifecycle of interactor execution</li>
+<li>Handles session management</li>
+<li>Provides access to the authenticated user</li>
+<li>Converts domain exceptions to GraphQL errors</li>
+</ul>
+</li>
+<li>
+<p><strong>Custom ObjectType</strong>: A type-safe GraphQL object implementation</p>
+<ul>
+<li>Extends Ariadne's ObjectType</li>
+<li>Provides type checking for parent-child relationships</li>
+<li>Automatically converts between GraphQL and domain types</li>
+<li>Validates resolver arguments against DTOs</li>
+</ul>
+</li>
+</ol>
+<h3 id="implementation-structure">Implementation Structure</h3>
+<ol>
+<li>
+<p><strong>Field Resolution</strong></p>
+<ul>
+<li>GraphQL fields are mapped to specific interactors using InteractorResolver</li>
+<li>Example for a mutation:
+    <div class="highlight"><pre><span></span><code><span class="n">mutation</span><span class="o">.</span><span class="n">set_field</span><span class="p">(</span><span class="s2">&quot;createCollection&quot;</span><span class="p">,</span> <span class="n">InteractorResolver</span><span class="p">(</span><span class="n">interactors</span><span class="o">.</span><span class="n">CreateCollection</span><span class="p">))</span>
+</code></pre></div></li>
+<li>Example for a query:
+    <div class="highlight"><pre><span></span><code><span class="n">query</span><span class="o">.</span><span class="n">set_field</span><span class="p">(</span><span class="s2">&quot;searchCodes&quot;</span><span class="p">,</span> <span class="n">InteractorResolver</span><span class="p">(</span><span class="n">interactors</span><span class="o">.</span><span class="n">SearchCodes</span><span class="p">))</span>
+</code></pre></div></li>
+</ul>
+</li>
+<li>
+<p><strong>Type Resolution</strong></p>
+<ul>
+<li>Object fields are resolved using interactors when needed</li>
+<li>Type-safe parent-child relationships are enforced</li>
+<li>Automatic conversion between GraphQL arguments and DTOs</li>
+</ul>
+</li>
+</ol>
+<h3 id="resolution-flow">Resolution Flow</h3>
+<ol>
+<li>
+<p><strong>Request Processing</strong></p>
+<ul>
+<li>GraphQL receives a query or mutation</li>
+<li>The appropriate resolver is identified</li>
+<li>InteractorResolver:<ol>
+<li>Creates a new interactor instance</li>
+<li>Provides database session and user context</li>
+<li>Passes any input data (DTO)</li>
+<li>Executes the use case</li>
+<li>Commits the transaction</li>
+<li>Returns the result or handles errors</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Type Safety</strong></p>
+<ul>
+<li>ObjectType ensures type compatibility between GraphQL and domain types</li>
+<li>Validates parent-child relationships in nested resolvers</li>
+<li>Converts GraphQL arguments to strongly-typed DTOs</li>
+<li>Provides clear error messages for type mismatches</li>
+</ul>
+</li>
+</ol>
+<p>This architecture provides several benefits:
+- Clear separation of concerns
+- Reusable business logic
+- Consistent error handling
+- Automatic transaction management
+- Strong type safety throughout the resolution chain</p>
+<h2 id="persistence-layer">Persistence Layer</h2>
+<p>The persistence layer is built on SQLAlchemy and follows a clean architecture approach with clear abstractions:</p>
+<ol>
+<li>
+<p><strong>Repository Pattern</strong></p>
+<ul>
+<li>Each domain entity has a corresponding repository interface</li>
+<li>Repositories are defined as Python Protocols</li>
+<li>Implementation details are hidden behind these interfaces</li>
+<li>Example repository interfaces:<ul>
+<li>UserRepository</li>
+<li>CollectionRepository</li>
+<li>PhenotypeRepository</li>
+<li>CodelistRepository</li>
+<li>OntologyRepository</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Session Management</strong></p>
+<ul>
+<li>Custom SQLAlchemy session implementation</li>
+<li>Provides convenient access to repositories</li>
+<li>Handles complex domain relationships (e.g., container-item relationships)</li>
+<li>Manages transaction boundaries</li>
+</ul>
+</li>
+<li>
+<p><strong>Caching Layer</strong></p>
+<ul>
+<li>Redis-based caching for ontology and code data</li>
+<li>In-memory caching for property data</li>
+<li>Implemented through repository decorators</li>
+<li>Improves performance for frequently accessed data</li>
+</ul>
+</li>
+</ol>
+<p>This abstraction allows for:</p>
+<ul>
+<li>Clear separation between domain and persistence concerns</li>
+<li>Easy testing through repository interfaces</li>
+<li>Flexibility to change the underlying storage implementation</li>
+<li>Efficient data access through caching where needed</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  <script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(() => { lightbox.reload() });
+</script></body>
+</html>
