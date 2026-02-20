@@ -35,7 +35,9 @@ import {
 import {calculateFilteredCodes} from './treeUtils'
 import {combineLatest} from './utils'
 import VirtualCodeTree, {VCodeTreeHandle} from './VirtualCodeTree'
+import {addCodes} from './store/changes'
 import useChangeSet from './useChangeSet'
+import InlineHelp from './InlineHelp'
 
 const MAX_CODES = 100000
 
@@ -238,6 +240,28 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
           )
           break
         }
+        case 'add_all': {
+          if (codelists.length === 1 && ontology && ontology.is_linear && codes) {
+            const codelist = codelists[0]
+            const existingCodeIds = visibleCodelistsCodeIds[String(codelist.id)] ?? new Set<number>()
+            const visibleCodes = (
+              pane.filteredCodes !== null
+                ? pane.filteredCodes.map((c) => c.id)
+                : (codes as LocalCode[]).map((c) => c.id)
+            ).filter((id) => !existingCodeIds.has(id))
+
+            if (visibleCodes.length > 0) {
+              dispatch(
+                addCodes({
+                  ontology: ontology.name,
+                  mcId: String(codelist.id),
+                  codes: visibleCodes.map((c) => `${c}`),
+                }),
+              )
+            }
+          }
+          break
+        }
 
         case 'collapse_all':
           dispatch(
@@ -255,7 +279,7 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
           break
       }
     },
-    [onPaneAdd, pane, ontology, codeTreeRef.current],
+    [onPaneAdd, pane, ontology, codeTreeRef.current, codes, codelists, visibleCodelistsCodeIds],
   )
 
   const items = useMemo(() => {
@@ -333,7 +357,17 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
         key: 'expand_all',
         disabled: codelists.length < 1 || pane.viewType === 'list',
       },
-      {label: 'Collapse all tiers', key: 'collapse_all', disabled: pane.viewType === 'list'},
+      {label: <>Collapse all tiers</>, key: 'collapse_all', disabled: pane.viewType === 'list'},
+      {
+        label: (
+          <>
+            Add all visible
+            <InlineHelp content={'You must have a single concept active and use a linear ontology.'} />
+          </>
+        ),
+        key: 'add_all',
+        disabled: codelists.length !== 1 || pane.viewType === 'list' || !ontology?.is_linear,
+      },
     ] as ItemType[]
 
     if (onPaneAdd) {
@@ -344,7 +378,7 @@ const OntologyViewer: React.FC<OntologyViewerProps> = ({onPaneAdd, onPaneClose, 
     return menuItems
 
     // return <Menu key={pane.id} onClick={handleMenuClick} items={menuItems} />
-  }, [onPaneAdd, codelists])
+  }, [onPaneAdd, codelists, ontology])
 
   const onSearch = async (f: Filter): Promise<SearchResultState[]> => {
     // dispatch(setPaneBusy({paneId: pane.id}))
