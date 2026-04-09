@@ -1,3 +1,56 @@
+[project]
+name = "medconb"
+version = "0.1.0"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "argon2-cffi",
+    "ariadne==0.26.*",
+    "authlib",
+    "confuse",
+    "pandas",
+    "plyse==1.0.3",
+    "psycopg2-binary",
+    "pydantic==2.*",
+    "pyjwt==2.8.0",
+    "pyparsing==2.4.0",
+    "pyyaml",
+    "redis",
+    "requests",
+    "sqlalchemy==2.0.*",
+    "starlette",
+    "starlette-context",
+    "uvicorn",
+]
+
+[dependency-groups]
+dev = [
+    "black",
+    "devtools",
+    "httpx",
+    "ipython",
+    "isort==5.*",
+    "mccabe",
+    "mypy==1.10.1",
+    "pycodestyle",
+    "pyflakes",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pylama",
+    "radon",
+    "sqlalchemy[mypy]",
+    "types-pyyaml",
+    "types-redis",
+    "types-requests",
+    "vulture",
+]
+docs = [
+    "mkdocstrings[python]",
+    "mkdocs-glightbox",
+    "mkdocs-literate-nav",
+    "mkdocs-material",
+]
+
 [tool.ariadne-codegen]
 schema_path = "schema.graphql"
 queries_path = "schema.graphql"

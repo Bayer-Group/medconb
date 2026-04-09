@@ -5,7 +5,8 @@ on:
     branches: [main, develop, feature/*]
     paths:
       - "backend/Dockerfile.base"
-      - "backend/environment.dev.fixed.yml"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/docker-base.yml"
   schedule:
     - cron: "5 4 * * *"
@@ -19,12 +20,10 @@ jobs:
     steps:
       - name: Checkout Repository 🛎️
         uses: actions/checkout@v5
-      - name: Extract requirements.txt 📦
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            yq -r '.dependencies[] | select(kind == "map") | .pip | join("\n") ' backend/environment.dev.fixed.yml \
-              | egrep -v '^pip($|=)' | tee backend/requirements.txt
+      - name: Install uv 📦
+        uses: astral-sh/setup-uv@v5
+      - name: Export requirements.txt 📦
+        run: uv export --frozen --no-hashes -o backend/requirements.txt
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -48,12 +47,10 @@ jobs:
     steps:
       - name: Checkout Repository 🛎️
         uses: actions/checkout@v5
-      - name: Extract requirements.txt 📦
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            yq -r '.dependencies[] | select(kind == "map") | .pip | join("\n") ' backend/environment.prod.fixed.yml \
-              | egrep -v '^pip($|=)' | tee backend/requirements.txt
+      - name: Install uv 📦
+        uses: astral-sh/setup-uv@v5
+      - name: Export requirements.txt 📦
+        run: uv export --frozen --no-dev --no-hashes -o backend/requirements.txt
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:

@@ -48,12 +48,31 @@ Together, let's make strides towards a more efficient, accurate, and collaborati
 
 Docs are created by mkdocs. For the branch `develop` they are published under this url: https://Bayer-Group.github.io/medconb/.
 
-If you want to see the docs locally (e.g. for a different branch), run `mkdocs serve -a localhost:8099` and go to http://localhost:8099.
+If you want to see the docs locally (e.g. for a different branch), run `uv run mkdocs serve -a localhost:8099` and go to http://localhost:8099.
 
 ## Local Deployment
+
+### Quick start (Docker)
 
 For you to check out MedConB quickly, we have a docker compose based setup that gets you started quickly
 to test the tool. All you need is docker and [docker compose](https://docs.docker.com/compose/)
 
 Then you can run `docker compose up` to start everything in the background. Once all services are up,
 go to http://localhost:3001 and use the dev login ("Sign in using dev token")
+
+### Development setup
+
+This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
+
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install all dependencies (dev + docs)
+make sync
+
+# Run all quality checks (lint, typecheck, tests)
+make all_qa
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.

@@ -5,6 +5,34 @@ You can contribute to this project in two ways:
 1.  **Reporting bugs** and **suggesting enhancements** by opening an issue.
 2.  **Contributing to the codebase** by opening a pull request.
 
+## Development setup
+
+This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
+
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install all dependencies (dev + docs)
+make sync
+# or equivalently:
+uv sync --group dev --group docs
+
+# Run all quality checks
+make all_qa
+
+# Run individual checks
+make lint
+make typecheck
+make test
+
+# Update the lockfile after changing dependencies in pyproject.toml
+make lock
+
+# Generate requirements.txt for Docker builds
+make requirements
+```
+
 ## Reporting bugs and suggesting enhancements
 
 To report a bug or suggest an enhancement, open an issue on the [Issues]. If
