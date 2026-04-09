@@ -1,4 +1,4 @@
-.PHONY: lint typecheck test all_qa clean sync lock requirements reset-databases-local reset-databases-k8s-develop
+.PHONY: lint typecheck test all_qa clean sync lock reset-databases-local reset-databases-k8s-develop
 SHELL:=/bin/bash
 
 all_qa: lint typecheck test
@@ -8,9 +8,6 @@ sync:
 
 lock:
 	uv lock
-
-requirements:
-	uv export --frozen --no-dev --no-hashes -o backend/requirements.txt
 
 lint:
 	black --check ./backend

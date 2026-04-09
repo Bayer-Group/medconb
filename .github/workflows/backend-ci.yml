@@ -104,10 +104,8 @@ jobs:
     steps:
       - name: Checkout Repository 🛎️
         uses: actions/checkout@v5
-      - name: Install uv 📦
-        uses: astral-sh/setup-uv@v5
-      - name: Export requirements.txt 📦
-        run: uv export --frozen --no-dev --no-hashes -o backend/requirements.txt
+      - name: Copy dependency files 📦
+        run: cp pyproject.toml uv.lock backend/
       - name: Log in to the Container registry
         if: inputs.do_push
         uses: docker/login-action@v3

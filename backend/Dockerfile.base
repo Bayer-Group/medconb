@@ -1,5 +1,7 @@
 FROM python:3.10
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
 RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/cache/apt/archives /var/lib/apt/lists/*
 
 RUN curl -L https://github.com/golang-migrate/migrate/releases/latest/download/migrate.linux-amd64.tar.gz -o migrate.tar.gz && \
@@ -7,5 +9,13 @@ RUN curl -L https://github.com/golang-migrate/migrate/releases/latest/download/m
     chmod +x /usr/local/bin/migrate && \
     rm migrate.tar.gz
 
-COPY requirements.txt . 
-RUN pip install -r requirements.txt
+ARG INCLUDE_DEV=false
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+COPY pyproject.toml uv.lock ./
+RUN if [ "$INCLUDE_DEV" = "true" ]; then \
+    uv sync --frozen --no-install-project; \
+    else \
+    uv sync --frozen --no-install-project --no-dev; \
+    fi
+
+ENV PATH="/opt/venv/bin:$PATH"

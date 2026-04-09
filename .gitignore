@@ -1,5 +1,6 @@
 backend/config.*
 !backend/config.default.yaml
+backend/assets/
 
 frontend/assets/config/config.json
 
