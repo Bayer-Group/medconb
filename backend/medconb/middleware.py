@@ -226,8 +226,8 @@ class AzureADAuthenticator:
         mapped_to: str
 
     def __init__(self, config: "ConfigView", session: Session):
-        template = confuse.Sequence({"name": str, "mapped_to": str})
-        extra_claims = [self.ClaimsConfig(**c) for c in config["claims"].get(template)]
+        template = confuse.Sequence({"name": str, "mapped_to": str})  # type: ignore[arg-type]
+        extra_claims = [self.ClaimsConfig(**c) for c in config["claims"].get(template)]  # type: ignore[arg-type]
 
         self._aud = config["aud"].get(str)
         self._extra_claims = extra_claims

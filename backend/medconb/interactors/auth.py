@@ -35,7 +35,7 @@ class RegisterUser(PublicInteractor):
             raise ValueError("Registration is deactivated")
         if not (
             config["auth"]["password"]["secret"].exists()
-            and config["auth"]["password"]["secret"].get(str)
+            and config["auth"]["password"]["secret"].get(str)  # type: ignore[arg-type]
         ):
             raise ValueError("Registration is deactivated")
 
@@ -68,7 +68,7 @@ class Login(PublicInteractor):
             raise ValueError("Password based Login is deactivated.")
         if not (
             config["auth"]["password"]["secret"].exists()
-            and config["auth"]["password"]["secret"].get(str)
+            and config["auth"]["password"]["secret"].get(str)  # type: ignore[arg-type]
         ):
             raise ValueError("Password based Login is deactivated")
 
