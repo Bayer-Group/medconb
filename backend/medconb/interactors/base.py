@@ -278,8 +278,7 @@ class CodelistNotExistsException(InteractorException):
 
     def __repr__(self) -> str:
         return (
-            f"Codelist with ID {self.codelist_id} "
-            "does not exist or is not accessible"
+            f"Codelist with ID {self.codelist_id} does not exist or is not accessible"
         )
 
 
@@ -289,6 +288,5 @@ class PhenotypeNotExistsException(InteractorException):
 
     def __repr__(self) -> str:
         return (
-            f"Phenotype with ID {self.phenotype_id} "
-            "does not exist or is not accessible"
+            f"Phenotype with ID {self.phenotype_id} does not exist or is not accessible"
         )

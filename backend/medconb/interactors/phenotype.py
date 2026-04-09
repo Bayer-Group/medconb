@@ -80,8 +80,8 @@ class CreatePhenotype(PhenotypeInteractor):
         return phenotype
 
 
-class UpdatePhenotype(PhenotypeInteractor):  # noqa: radon complexity
-    def __call__(  # noqa: radon complexity
+class UpdatePhenotype(PhenotypeInteractor):  # noqa: C901
+    def __call__(  # noqa: C901
         self, dto: gql.UpdatePhenotypeRequestDto
     ) -> d.Phenotype:
         phenotype = self._must_load_phenotype(dto.phenotype_id)

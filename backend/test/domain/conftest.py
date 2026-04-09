@@ -32,7 +32,7 @@ def make_collection(
 
 def _print_tree(cl: d.Codelist, level=0, /, file=sys.stdout):
     print(
-        " " * level + f"- {_s_uuid(cl.id)} " f"(name={cl.name})",
+        " " * level + f"- {_s_uuid(cl.id)} (name={cl.name})",
         file=file,
     )
 

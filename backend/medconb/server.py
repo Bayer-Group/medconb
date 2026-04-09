@@ -67,9 +67,9 @@ class TimedGraphQLWSHandler(GraphQLWSHandler):
 
 
 def validation_rules(context_value: Optional[Any], document: DocumentNode, data: dict):
-    assert isinstance(
-        context_value, dict
-    ), "Can not instantiate validation rules: context_value needs to be a dictionary"
+    assert isinstance(context_value, dict), (
+        "Can not instantiate validation rules: context_value needs to be a dictionary"
+    )
 
     request = context_value["request"]
     assert isinstance(request, Request)

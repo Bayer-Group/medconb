@@ -10,15 +10,14 @@ lock:
 	uv lock
 
 lint:
-	black --check ./backend
-	isort --check ./backend
-	pylama ./backend
+	uv run ruff format --check ./backend
+	uv run ruff check ./backend
 
 typecheck:
-	mypy backend/medconb
+	uv run mypy backend/medconb
 
 test:
-	pytest --cov-config=.coveragerc --cov-report xml:cov.xml --cov-report term --cov backend/medconb backend/test/domain backend/test/graphql backend/test/interactors backend/test/persistence backend/test/middleware backend/test/api
+	uv run pytest --cov-config=.coveragerc --cov-report xml:cov.xml --cov-report term --cov backend/medconb backend/test/domain backend/test/graphql backend/test/interactors backend/test/persistence backend/test/middleware backend/test/api
 
 clean:
 	find . -type d -name __pycache__ | xargs rm -rf

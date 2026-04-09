@@ -27,7 +27,8 @@ def graphql_request(client, body):
 def test_createCollection(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 createCollection(
                     name: "Test 1"
                     itemType: Codelist
@@ -60,7 +61,8 @@ def test_createCollection(client: "TestClient"):
                     sharedWith
                     properties {propertyID name value}
                 }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -122,7 +124,8 @@ def test_deleteCollection(client: "TestClient"):
 
     response = graphql_request(
         client,
-        {"query": """query {
+        {
+            "query": """query {
                 self {
                     id
                     workspace {
@@ -132,7 +135,8 @@ def test_deleteCollection(client: "TestClient"):
                         }
                     }
                 }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -144,7 +148,8 @@ def test_deleteCollection(client: "TestClient"):
 def test_updateCollection(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 updateCollection(
                     collectionID: "00000000-0000-0000-0002-000000000002"
                     name: "Study 42"
@@ -162,7 +167,8 @@ def test_updateCollection(client: "TestClient"):
                         }
                     ]
                 ) { id name description }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]["updateCollection"]
@@ -174,7 +180,8 @@ def test_updateCollection(client: "TestClient"):
 
     response = graphql_request(
         client,
-        {"query": """query {
+        {
+            "query": """query {
                 collection(id: "00000000-0000-0000-0002-000000000002") {
                     id
                     name
@@ -182,7 +189,8 @@ def test_updateCollection(client: "TestClient"):
                     referenceID
                     properties {propertyID name value}
                 }
-            }"""},
+            }"""
+        },
     )
 
     updated_collection = json.loads(response.text)["data"]["collection"]
@@ -200,12 +208,14 @@ def test_updateCollection(client: "TestClient"):
 def test_moveCollection(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 moveCollection(
                     collectionID: "00000000-0000-0000-0002-000000000001"
                     refCollectionID: null
                 )
-            }"""},
+            }"""
+        },
     )
     assertDictEqual(
         json.loads(response.text),
@@ -214,7 +224,8 @@ def test_moveCollection(client: "TestClient"):
 
     response = graphql_request(
         client,
-        {"query": """query {
+        {
+            "query": """query {
                 self {
                     id
                     workspace {
@@ -224,7 +235,8 @@ def test_moveCollection(client: "TestClient"):
                         }
                     }
                 }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -235,12 +247,14 @@ def test_moveCollection(client: "TestClient"):
 def test_setCollectionPermissions(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 setCollectionPermissions(
                     collectionID: "00000000-0000-0000-0002-000000000002"
                     readerIds: ["00000000-0000-0000-0001-000000000001"]
                 )
-            }"""},
+            }"""
+        },
     )
     assertDictEqual(
         json.loads(response.text),
@@ -251,7 +265,8 @@ def test_setCollectionPermissions(client: "TestClient"):
 def test_createPhenotype(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 createPhenotype(
                     position: { containerID: "00000000-0000-0000-0002-000000000007" }
                     name: "Test 1"
@@ -278,7 +293,8 @@ def test_createPhenotype(client: "TestClient"):
                     codelists { id }
                     properties { propertyID name value }
                 }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -321,9 +337,11 @@ def test_createPhenotype(client: "TestClient"):
 def test_deletePhenotype(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation { deletePhenotype(
+        {
+            "query": """mutation { deletePhenotype(
                 phenotypeID: "00000000-0000-0000-0005-000000000001"
-            ) }"""},
+            ) }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]["deletePhenotype"]
@@ -331,11 +349,13 @@ def test_deletePhenotype(client: "TestClient"):
 
     response = graphql_request(
         client,
-        {"query": """query {
+        {
+            "query": """query {
                 phenotype(
                     phenotypeID: "00000000-0000-0000-0005-000000000001"
                 ) { id }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)
@@ -346,7 +366,8 @@ def test_deletePhenotype(client: "TestClient"):
 def test_updatePhenotype(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 updatePhenotype(
                     phenotypeID: "00000000-0000-0000-0005-000000000001"
                     position: {
@@ -368,7 +389,8 @@ def test_updatePhenotype(client: "TestClient"):
                         }
                     ]
                 ) { id name medicalDescription }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]["updatePhenotype"]
@@ -380,7 +402,8 @@ def test_updatePhenotype(client: "TestClient"):
 
     response = graphql_request(
         client,
-        {"query": """query {
+        {
+            "query": """query {
                 phenotype(phenotypeID: "00000000-0000-0000-0005-000000000001") {
                     id
                     name
@@ -398,7 +421,8 @@ def test_updatePhenotype(client: "TestClient"):
                         }
                     }
                 }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -421,14 +445,16 @@ def test_updatePhenotype(client: "TestClient"):
 def test_createCodelist(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 createCodelist(
                     position: { containerID: "00000000-0000-0000-0002-000000000002" }
                     name: "Test CL 42"
                     description: "Test D"
                     referenceID: "00000000-0000-0000-0004-000000000005"
                 ) { id }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -462,11 +488,13 @@ def test_createCodelist(client: "TestClient"):
 def test_deleteCodelist(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 deleteCodelist(
                     codelistID: "00000000-0000-0000-0004-000000000004"
                 )
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]["deleteCodelist"]
@@ -474,13 +502,15 @@ def test_deleteCodelist(client: "TestClient"):
 
     response = graphql_request(
         client,
-        {"query": """query {
+        {
+            "query": """query {
                 codelist(
                     codelistID: "00000000-0000-0000-0004-000000000004"
                 ) {
                     id
                 }
-            }"""},
+            }"""
+        },
     )
 
     assert json.loads(response.text)["data"] is None
@@ -490,14 +520,16 @@ def test_deleteCodelist(client: "TestClient"):
 def test_updateCodelist(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 updateCodelist(
                     codelistID: "00000000-0000-0000-0004-000000000004"
                     name: "CL 42"
                     description: "dCC 42"
                     referenceID: "00000000-0000-0000-0004-000000000005"
                 ) { id name description }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]["updateCodelist"]
@@ -509,7 +541,8 @@ def test_updateCodelist(client: "TestClient"):
 
     response = graphql_request(
         client,
-        {"query": """query {
+        {
+            "query": """query {
                 codelist(
                     codelistID: "00000000-0000-0000-0004-000000000004"
                 ) {
@@ -518,7 +551,8 @@ def test_updateCodelist(client: "TestClient"):
                     description
                     referenceID
                 }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -532,11 +566,13 @@ def test_updateCodelist(client: "TestClient"):
 def test_cloneCodelist(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 cloneCodelist(
                     codelistID: "00000000-0000-0000-0004-000000000004"
                 ) { id }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -580,7 +616,8 @@ def test_cloneCodelist(client: "TestClient"):
 def test_importCodelist(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 importCodelists(
                     containerID: "00000000-0000-0000-0002-000000000002"
                     codelists: [
@@ -611,7 +648,8 @@ def test_importCodelist(client: "TestClient"):
                         report
                     }
                 }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -667,7 +705,8 @@ def test_importCodelist(client: "TestClient"):
 def test_moveCodelist(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 moveCodelist(
                     codelistID: "00000000-0000-0000-0004-000000000002"
                     position: {
@@ -675,7 +714,8 @@ def test_moveCodelist(client: "TestClient"):
                         itemID: "00000000-0000-0000-0004-000000000004"
                     }
                 )
-            }"""},
+            }"""
+        },
     )
     assertDictEqual(
         json.loads(response.text),
@@ -684,7 +724,8 @@ def test_moveCodelist(client: "TestClient"):
 
     response = graphql_request(
         client,
-        {"query": """query {
+        {
+            "query": """query {
                 self {
                     id
                     workspace {
@@ -697,7 +738,8 @@ def test_moveCodelist(client: "TestClient"):
                         }
                     }
                 }
-            }"""},
+            }"""
+        },
     )
 
     resp_data = json.loads(response.text)["data"]
@@ -732,7 +774,8 @@ def test_moveCodelist(client: "TestClient"):
 def test_commitChanges(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 commitChanges(
                     codelistID: "00000000-0000-0000-0004-000000000004"
                     commit: {
@@ -746,7 +789,8 @@ def test_commitChanges(client: "TestClient"):
                         ]
                     }
                 ) { id }
-            }"""},
+            }"""
+        },
     )
     assertDictEqual(
         json.loads(response.text),
@@ -759,7 +803,8 @@ def test_commitChanges(client: "TestClient"):
 def test_storeTransientChanges(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 storeTransientChanges(
                     codelistID: "00000000-0000-0000-0004-000000000004"
                     changes: [
@@ -770,7 +815,8 @@ def test_storeTransientChanges(client: "TestClient"):
                         }
                     ]
                 ) { id }
-            }"""},
+            }"""
+        },
     )
     assertDictEqual(
         json.loads(response.text),
@@ -783,11 +829,13 @@ def test_storeTransientChanges(client: "TestClient"):
 def test_discardTransientChanges(client: "TestClient"):
     response = graphql_request(
         client,
-        {"query": """mutation {
+        {
+            "query": """mutation {
                 discardTransientChanges(
                     codelistID: "00000000-0000-0000-0004-000000000004"
                 ) { id }
-            }"""},
+            }"""
+        },
     )
     assertDictEqual(
         json.loads(response.text),

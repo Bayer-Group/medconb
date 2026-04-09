@@ -26,10 +26,10 @@ jobs:
         uses: astral-sh/setup-uv@v5
       - name: Set up runner 📦
         run: uv sync --frozen
-      - name: "Black: Code Formatting 👮🏽‍♀️"
-        run: uv run black --check ./backend
-      - name: "Pylama: Linting 🧹"
-        run: uv run pylama ./backend
+      - name: "Ruff: Formatting 👮🏽‍♀️"
+        run: uv run ruff format --check ./backend
+      - name: "Ruff: Linting 🧹"
+        run: uv run ruff check ./backend
 
   typecheck:
     runs-on: ubuntu-latest

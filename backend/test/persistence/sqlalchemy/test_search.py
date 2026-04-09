@@ -298,16 +298,16 @@ class TestSearchObjects:
             query, _u_id(test.user_id), 3, None
         )
 
-        assert [_cl_id(i + 0x10) for i in test.want[:3]] == [
-            c.id for c in items
-        ], "p: 3 / None"
+        assert [_cl_id(i + 0x10) for i in test.want[:3]] == [c.id for c in items], (
+            "p: 3 / None"
+        )
         assert total == len(test.want), "p: 3 / None"
 
         items, total = session.codelist_repository.search(
             query, _u_id(test.user_id), 3, _cl_id(10 + 0x10)
         )
 
-        assert [_cl_id(i + 0x10) for i in [11, 12, 14]] == [
-            c.id for c in items
-        ], "p: 3 / 10"
+        assert [_cl_id(i + 0x10) for i in [11, 12, 14]] == [c.id for c in items], (
+            "p: 3 / 10"
+        )
         assert total == len(test.want), "p: 3 / 10"

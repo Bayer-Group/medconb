@@ -10,15 +10,15 @@ from medconb.types import CodeRepository, sessionmaker
 from . import ontology_orm, orm
 from .cache import CachedCodeRepository, CachedPropertyRepository
 from .orm import MappedCodelist, MappedPhenotype
-from .repositories import CodelistRepository
-from .repositories import CodeRepository as PGCodeRepository
 from .repositories import (
+    CodelistRepository,
     CollectionRepository,
     OntologyRepository,
     PhenotypeRepository,
     PropertyRepository,
     UserRepository,
 )
+from .repositories import CodeRepository as PGCodeRepository
 
 
 class Session(SQLSession):
@@ -79,7 +79,7 @@ class Session(SQLSession):
         self,
         code_repository: Callable[..., CodeRepository],
         property_repository: Callable[..., PropertyRepository],
-        **kw
+        **kw,
     ) -> None:
         super().__init__(**kw)
         self._code_repository = code_repository

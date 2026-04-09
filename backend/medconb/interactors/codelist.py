@@ -330,7 +330,7 @@ class ImportCodelists(BaseCodelistInteractor):  # noqa R901 - too complex
 
         return self._validate_codesets(codelist_data.codesets)
 
-    def _validate_codesets(  # noqa: complexity
+    def _validate_codesets(  # noqa: C901
         self, codesets: list[gql.CodesetInput]
     ) -> tuple[dict[str, importer.ValidatedCodeset], list[str]]:
         validated_cs: dict[str, importer.ValidatedCodeset | None] = {}

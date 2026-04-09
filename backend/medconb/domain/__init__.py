@@ -47,5 +47,7 @@ from .phenotype import Phenotype, PhenotypeID
 from .user import CollectionNotInWorkspaceException, User, Workspace
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .container import ContainerID  # noqa: imported but unused
-    from .container import ContainerItemID  # noqa: imported but unused
+    from .container import (
+        ContainerID,  # noqa: F401
+        ContainerItemID,  # noqa: F401
+    )

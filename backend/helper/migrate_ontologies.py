@@ -848,9 +848,9 @@ def assert_referenced_codes_exist_in_new_table(session: SQLSession):
             # ":\n", codes
         )
 
-        assert len(codes) == len(
-            ids
-        ), f" -> Not all {len(ids)} ids referenced are present in the code table"
+        assert len(codes) == len(ids), (
+            f" -> Not all {len(ids)} ids referenced are present in the code table"
+        )
 
         new_codes = set()
         for code_chunk in chunked(list(codes), MAX_PARAMS):

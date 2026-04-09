@@ -244,7 +244,7 @@ class Codelist:
         self.transient_commit = None
         self._codesets = None
 
-    def __eq__(self, other: object):  # noqa: radon complexity
+    def __eq__(self, other: object):  # noqa: C901
         if not isinstance(other, Codelist):
             return NotImplemented
 

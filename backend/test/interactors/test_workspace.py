@@ -431,7 +431,7 @@ class TestCloneCollection:
         assert result.description == "Test Description"
         assert result.shared_with == set()  # Not shared with anyone
 
-    def test_clone_properties_handling(  # noqa: radon complexity
+    def test_clone_properties_handling(  # noqa: C901
         self, session: Session, user: d.User
     ):
         """
